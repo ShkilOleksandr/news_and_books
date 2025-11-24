@@ -1,65 +1,148 @@
-import Image from "next/image";
+'use client';
+import { useState } from 'react';
 
-export default function Home() {
+const translations = {
+  uk: {
+    news: 'Новини',
+    heroTitle: 'БУДЬ В КУРСІ',
+    heroSubtitle: 'Твоя історія починається тут — з кроку до мрій, ідей і змін.',
+    readMore: 'Читати далі',
+    footer: '© 2024 Всі права захищені'
+  },
+  en: {
+    news: 'News',
+    heroTitle: 'STAY INFORMED',
+    heroSubtitle: 'Your story starts here — with a step toward dreams, ideas, and change.',
+    readMore: 'Read More',
+    footer: '© 2024 All rights reserved'
+  }
+};
+
+export default function Website() {
+  type Lang = keyof typeof translations;
+  const [lang, setLang] = useState<Lang>('uk');
+  const t = translations[lang];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-black text-white flex flex-col">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-1">
+            <div className="w-10 h-10 bg-green-500 flex items-center justify-center font-bold text-xl">K</div>
+            <div className="w-10 h-10 bg-green-500 flex items-center justify-center font-bold text-xl">Y</div>
+            <div className="w-10 h-10 bg-green-500 flex items-center justify-center font-bold text-xl">R</div>
+            <div className="w-10 h-10 bg-green-500 flex items-center justify-center font-bold text-xl">S</div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex items-center gap-8">
+            <a href="#news" className="hover:text-green-500 transition-colors text-lg">
+              {t.news}
+            </a>
+            
+            {/* Language Switcher */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setLang('uk')}
+                className={`px-3 py-1 rounded ${lang === 'uk' ? 'bg-green-500 text-black' : 'bg-gray-800 hover:bg-gray-700'} transition-colors`}
+              >
+                UK
+              </button>
+              <button
+                onClick={() => setLang('en')}
+                className={`px-3 py-1 rounded ${lang === 'en' ? 'bg-green-500 text-black' : 'bg-gray-800 hover:bg-gray-700'} transition-colors`}
+              >
+                EN
+              </button>
+            </div>
+          </nav>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+      </header>
+
+      {/* Hero Section */}
+      <main className="flex-1 pt-20">
+        <section className="relative min-h-screen flex items-center">
+          {/* Grid of images - right side */}
+          <div className="absolute right-0 top-0 bottom-0 w-1/2 grid grid-cols-2 gap-4 p-8">
+            <div className="bg-gray-800 rounded-lg overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=300&fit=crop" alt="" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" />
+            </div>
+            <div className="bg-green-500 rounded-lg flex items-center justify-center">
+              <div className="w-24 h-24 bg-black rounded-full"></div>
+            </div>
+            <div className="bg-gray-800 rounded-lg overflow-hidden col-span-2 relative">
+              <img src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=600&h=300&fit=crop" alt="" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-transparent flex items-center justify-center">
+                <div className="text-6xl font-bold">
+                  <span className="text-green-500">{lang === 'uk' ? 'Голос' : 'Voice'}</span>
+                  <br />
+                  <span>{lang === 'uk' ? 'Важливий' : 'Matters'}</span>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-800 rounded-lg overflow-hidden col-span-2">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=300&fit=crop" alt="" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" />
+            </div>
+          </div>
+
+          {/* Text content - left side */}
+          <div className="relative z-10 max-w-3xl px-12 py-20">
+            <h1 className="text-8xl font-bold mb-8 leading-tight" style={{ 
+              WebkitTextStroke: '2px white',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              {t.heroTitle}
+            </h1>
+            <p className="text-xl mb-12 text-gray-300 max-w-xl">
+              {t.heroSubtitle}
+            </p>
+            <button className="bg-green-500 text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-400 transition-all transform hover:scale-105">
+              {t.readMore}
+            </button>
+          </div>
+        </section>
+
+        {/* News Section */}
+        <section id="news" className="py-20 px-12 bg-gray-900">
+          <h2 className="text-5xl font-bold mb-12">{t.news}</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="group cursor-pointer">
+                <div className="bg-gray-800 rounded-lg overflow-hidden mb-4 h-64">
+                  <img 
+                    src={`https://images.unsplash.com/photo-${1550000000000 + item * 10000000}?w=400&h=300&fit=crop`}
+                    alt={`News ${item}`}
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
+                  />
+                </div>
+                <h3 className="text-2xl font-bold mb-2 group-hover:text-green-500 transition-colors">
+                  {lang === 'uk' ? `Новина ${item}` : `News ${item}`}
+                </h3>
+                <p className="text-gray-400">
+                  {lang === 'uk' 
+                    ? 'Короткий опис новини, що привертає увагу читача...'
+                    : 'A brief description of the news that captures attention...'}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-black border-t border-gray-800 py-8">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">K</div>
+            <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">Y</div>
+            <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">R</div>
+            <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">S</div>
+          </div>
+          <p className="text-gray-400">{t.footer}</p>
+        </div>
+      </footer>
     </div>
   );
 }
