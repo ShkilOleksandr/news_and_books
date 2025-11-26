@@ -25,41 +25,7 @@ export default function Website() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-1">
-            <div className="w-10 h-10 bg-green-500 flex items-center justify-center font-bold text-xl">K</div>
-            <div className="w-10 h-10 bg-green-500 flex items-center justify-center font-bold text-xl">Y</div>
-            <div className="w-10 h-10 bg-green-500 flex items-center justify-center font-bold text-xl">R</div>
-            <div className="w-10 h-10 bg-green-500 flex items-center justify-center font-bold text-xl">S</div>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex items-center gap-8">
-            <a href="#news" className="hover:text-green-500 transition-colors text-lg">
-              {t.news}
-            </a>
-            
-            {/* Language Switcher */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setLang('uk')}
-                className={`px-3 py-1 rounded ${lang === 'uk' ? 'bg-green-500 text-black' : 'bg-gray-800 hover:bg-gray-700'} transition-colors`}
-              >
-                UK
-              </button>
-              <button
-                onClick={() => setLang('en')}
-                className={`px-3 py-1 rounded ${lang === 'en' ? 'bg-green-500 text-black' : 'bg-gray-800 hover:bg-gray-700'} transition-colors`}
-              >
-                EN
-              </button>
-            </div>
-          </nav>
-        </div>
-      </header>
+     
 
       {/* Hero Section */}
       <main className="flex-1 pt-20">
@@ -131,18 +97,6 @@ export default function Website() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-black border-t border-gray-800 py-8">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">K</div>
-            <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">Y</div>
-            <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">R</div>
-            <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">S</div>
-          </div>
-          <p className="text-gray-400">{t.footer}</p>
-        </div>
-      </footer>
     </div>
   );
 }
