@@ -1,4 +1,5 @@
 'use client';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { useState } from 'react';
 
 const translations = {
@@ -115,7 +116,7 @@ const categories = [
 ];
 
 export default function NewsPage() {
-  const [lang, setLang] = useState('uk');
+  const { lang } = useLanguage(); 
   const [selectedCategory, setSelectedCategory] = useState('Всі');
   const [searchQuery, setSearchQuery] = useState('');
   const t = translations[lang];

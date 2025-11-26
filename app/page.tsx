@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { useLanguage } from './context/LanguageContext';
 
 const translations = {
   uk: {
@@ -20,7 +21,7 @@ const translations = {
 
 export default function Website() {
   type Lang = keyof typeof translations;
-  const [lang, setLang] = useState<Lang>('uk');
+  const { lang } = useLanguage(); 
   const t = translations[lang];
 
   return (

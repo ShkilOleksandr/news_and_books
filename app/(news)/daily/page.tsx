@@ -1,4 +1,5 @@
 'use client';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { use, useState } from 'react';
 
 const translations = {
@@ -73,7 +74,7 @@ const relatedTopics = [
 ];
 
 export default function DailyTopicPage() {
-  const [lang, setLang] = useState('uk');
+  const { lang } = useLanguage(); 
   const t = translations[lang];
   const content = dailyContent[lang];
 
