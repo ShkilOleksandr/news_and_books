@@ -158,26 +158,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Copyright and Language */}
-          <div className="flex items-center gap-4">
-            <p className="text-gray-400 text-sm">
-              © 2024 KYRS. {t.copyright}
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setLang('uk')}
-                className={`px-3 py-1 rounded text-sm ${lang === 'uk' ? 'bg-green-500 text-black' : 'bg-gray-800 hover:bg-gray-700 text-gray-400'} transition-colors`}
-              >
-                UK
-              </button>
-              <button
-                onClick={() => setLang('en')}
-                className={`px-3 py-1 rounded text-sm ${lang === 'en' ? 'bg-green-500 text-black' : 'bg-gray-800 hover:bg-gray-700 text-gray-400'} transition-colors`}
-              >
-                EN
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </footer>

@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 const translations = {
   uk: {
@@ -53,7 +54,6 @@ const translations = {
 };
 
 export default function ContactPage() {
-  const [lang, setLang] = useState('uk');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -61,6 +61,7 @@ export default function ContactPage() {
     message: ''
   });
   const [status, setStatus] = useState('');
+  const { lang, setLang } = useLanguage();
   
   const t = translations[lang];
 

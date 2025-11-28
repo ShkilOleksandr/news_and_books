@@ -1,109 +1,43 @@
 'use client';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { useState } from 'react';
+import { supabase } from '@/app/lib/supabase';
+import { useState, useEffect } from 'react';
+
+// Add this type definition
+type NewsItem = {
+  id: number;
+  title_uk: string;
+  title_en: string;
+  excerpt_uk: string;
+  excerpt_en: string;
+  content_uk: string;
+  content_en: string;
+  category_uk: string;
+  category_en: string;
+  main_image: string | null;
+  author_uk: string;
+  author_en: string;
+  featured: boolean;
+  read_time: number;
+  created_at: string;
+};
 
 const translations = {
   uk: {
-    daily: 'Щоденна тема',
-    news: 'Новини',
-    about: 'Про нас',
-    contact: 'Контакти',
     allNews: 'Всі новини',
     latest: 'Останні',
     featured: 'Обране',
-    categories: 'Категорії',
     searchPlaceholder: 'Пошук новин...',
     readMore: 'Читати далі'
   },
   en: {
-    daily: 'Daily Topic',
-    news: 'News',
-    about: 'About',
-    contact: 'Contact',
     allNews: 'All News',
     latest: 'Latest',
     featured: 'Featured',
-    categories: 'Categories',
     searchPlaceholder: 'Search news...',
     readMore: 'Read More'
   }
 };
-
-// Mock news data
-const newsItems = [
-  {
-    id: 1,
-    title_uk: 'Нові технології змінюють освіту',
-    title_en: 'New Technologies Transform Education',
-    excerpt_uk: 'Штучний інтелект та віртуальна реальність відкривають нові можливості для навчання...',
-    excerpt_en: 'Artificial intelligence and virtual reality open new opportunities for learning...',
-    category_uk: 'Технології',
-    category_en: 'Technology',
-    image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&h=400&fit=crop',
-    date: '2024-11-25',
-    featured: true
-  },
-  {
-    id: 2,
-    title_uk: 'Екологічні ініціативи в містах',
-    title_en: 'Environmental Initiatives in Cities',
-    excerpt_uk: 'Українські міста впроваджують нові програми для захисту довкілля та зниження викидів...',
-    excerpt_en: 'Ukrainian cities implement new programs to protect the environment and reduce emissions...',
-    category_uk: 'Екологія',
-    category_en: 'Environment',
-    image: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop',
-    date: '2024-11-24',
-    featured: true
-  },
-  {
-    id: 3,
-    title_uk: 'Розвиток стартап-екосистеми',
-    title_en: 'Startup Ecosystem Development',
-    excerpt_uk: 'Молоді підприємці отримують більше можливостей для розвитку своїх проектів...',
-    excerpt_en: 'Young entrepreneurs get more opportunities to develop their projects...',
-    category_uk: 'Бізнес',
-    category_en: 'Business',
-    image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&h=400&fit=crop',
-    date: '2024-11-23',
-    featured: false
-  },
-  {
-    id: 4,
-    title_uk: 'Культурні події цього тижня',
-    title_en: 'Cultural Events This Week',
-    excerpt_uk: 'Огляд найцікавіших виставок, концертів та театральних вистав...',
-    excerpt_en: 'Overview of the most interesting exhibitions, concerts and theater performances...',
-    category_uk: 'Культура',
-    category_en: 'Culture',
-    image: 'https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=600&h=400&fit=crop',
-    date: '2024-11-22',
-    featured: false
-  },
-  {
-    id: 5,
-    title_uk: 'Спортивні досягнення місяця',
-    title_en: 'Sports Achievements of the Month',
-    excerpt_uk: 'Українські спортсмени продовжують показувати видатні результати на міжнародній арені...',
-    excerpt_en: 'Ukrainian athletes continue to show outstanding results on the international stage...',
-    category_uk: 'Спорт',
-    category_en: 'Sports',
-    image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&h=400&fit=crop',
-    date: '2024-11-21',
-    featured: false
-  },
-  {
-    id: 6,
-    title_uk: 'Інновації в медицині',
-    title_en: 'Innovations in Medicine',
-    excerpt_uk: 'Нові методи лікування та діагностики стають доступнішими для пацієнтів...',
-    excerpt_en: 'New treatment and diagnostic methods become more accessible to patients...',
-    category_uk: 'Здоров\'я',
-    category_en: 'Health',
-    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&h=400&fit=crop',
-    date: '2024-11-20',
-    featured: false
-  }
-];
 
 const categories = [
   { uk: 'Всі', en: 'All' },
@@ -119,17 +53,47 @@ export default function NewsPage() {
   const { lang } = useLanguage(); 
   const [selectedCategory, setSelectedCategory] = useState('Всі');
   const [searchQuery, setSearchQuery] = useState('');
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const t = translations[lang];
+
+  // Fetch news from Supabase
+  useEffect(() => {
+    async function fetchNews() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('news')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching news:', error);
+        setNewsItems([]); // Set empty array on error
+      } else {
+        setNewsItems(data as NewsItem[] || []); // Cast to NewsItem[]
+      }
+      setLoading(false);
+    }
+
+      fetchNews();
+    }, []);
 
   const featuredNews = newsItems.filter(item => item.featured);
   const regularNews = newsItems.filter(item => !item.featured);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white pt-24 pb-20">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <div className="text-2xl">Завантаження...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white">
-
-
-      {/* Main Content */}
-      <main className="pt-24 pb-20">
+    <div className="min-h-screen bg-black text-white pt-24 pb-20">
+      <main>
         <div className="max-w-7xl mx-auto px-6">
           {/* Page Title */}
           <h1 className="text-6xl font-bold mb-12">{t.allNews}</h1>
@@ -174,10 +138,10 @@ export default function NewsPage() {
               <h2 className="text-3xl font-bold mb-8">{t.featured}</h2>
               <div className="grid md:grid-cols-2 gap-8">
                 {featuredNews.map((item) => (
-                  <div key={item.id} className="group cursor-pointer">
+                  <a key={item.id} href={`/news/${item.id}`} className="group cursor-pointer block">
                     <div className="bg-gray-800 rounded-lg overflow-hidden mb-4 h-80">
                       <img 
-                        src={item.image}
+                        src={item.main_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&h=600&fit=crop'}
                         alt={lang === 'uk' ? item.title_uk : item.title_en}
                         className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
                       />
@@ -186,7 +150,7 @@ export default function NewsPage() {
                       <span className="bg-green-500 text-black px-3 py-1 rounded-full text-sm font-bold">
                         {lang === 'uk' ? item.category_uk : item.category_en}
                       </span>
-                      <span className="text-gray-400 text-sm">{item.date}</span>
+                      <span className="text-gray-400 text-sm">{new Date(item.created_at).toLocaleDateString()}</span>
                     </div>
                     <h3 className="text-2xl font-bold mb-3 group-hover:text-green-500 transition-colors">
                       {lang === 'uk' ? item.title_uk : item.title_en}
@@ -194,10 +158,10 @@ export default function NewsPage() {
                     <p className="text-gray-400 mb-4">
                       {lang === 'uk' ? item.excerpt_uk : item.excerpt_en}
                     </p>
-                    <button className="text-green-500 hover:text-green-400 font-bold transition-colors">
+                    <span className="text-green-500 hover:text-green-400 font-bold transition-colors">
                       {t.readMore} →
-                    </button>
-                  </div>
+                    </span>
+                  </a>
                 ))}
               </div>
             </section>
@@ -208,10 +172,10 @@ export default function NewsPage() {
             <h2 className="text-3xl font-bold mb-8">{t.latest}</h2>
             <div className="grid md:grid-cols-3 gap-8">
               {regularNews.map((item) => (
-                <div key={item.id} className="group cursor-pointer">
+                <a key={item.id} href={`/news/${item.id}`} className="group cursor-pointer block">
                   <div className="bg-gray-800 rounded-lg overflow-hidden mb-4 h-48">
                     <img 
-                      src={item.image}
+                      src={item.main_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&h=400&fit=crop'}
                       alt={lang === 'uk' ? item.title_uk : item.title_en}
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
                     />
@@ -220,7 +184,7 @@ export default function NewsPage() {
                     <span className="bg-gray-800 text-white px-3 py-1 rounded-full text-sm">
                       {lang === 'uk' ? item.category_uk : item.category_en}
                     </span>
-                    <span className="text-gray-400 text-sm">{item.date}</span>
+                    <span className="text-gray-400 text-sm">{new Date(item.created_at).toLocaleDateString()}</span>
                   </div>
                   <h3 className="text-xl font-bold mb-2 group-hover:text-green-500 transition-colors">
                     {lang === 'uk' ? item.title_uk : item.title_en}
@@ -228,16 +192,15 @@ export default function NewsPage() {
                   <p className="text-gray-400 text-sm mb-3">
                     {lang === 'uk' ? item.excerpt_uk : item.excerpt_en}
                   </p>
-                  <button className="text-green-500 hover:text-green-400 text-sm font-bold transition-colors">
+                  <span className="text-green-500 hover:text-green-400 text-sm font-bold transition-colors">
                     {t.readMore} →
-                  </button>
-                </div>
+                  </span>
+                </a>
               ))}
             </div>
           </section>
         </div>
       </main>
-
     </div>
   );
 }

@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 const translations = {
   uk: {
@@ -39,7 +40,7 @@ const translations = {
 };
 
 export default function AboutPage() {
-  const [lang, setLang] = useState('uk');
+  const { lang, setLang } = useLanguage();
   const t = translations[lang];
 
   return (
