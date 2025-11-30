@@ -148,7 +148,15 @@ export default function AdminDashboard() {
           >
             {t.createNewArticle}
           </a>
+          <a
+            href="/admin/pages"
+            className="bg-gray-800 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-700 transition-colors"
+          >
+            {lang === 'uk' ? 'Редагувати сторінки' : 'Edit Pages'}
+          </a>
         </div>
+
+    
 
         {/* Stats */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
