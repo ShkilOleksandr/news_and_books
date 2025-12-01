@@ -1,33 +1,74 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from './context/LanguageContext';
+import { supabase } from './lib/supabase';
 
-const translations = {
-  uk: {
-    news: 'Новини',
-    heroTitle: 'БУДЬ В КУРСІ',
-    heroSubtitle: 'Твоя історія починається тут — з кроку до мрій, ідей і змін.',
-    readMore: 'Читати далі',
-    footer: '© 2024 Всі права захищені'
-  },
-  en: {
-    news: 'News',
-    heroTitle: 'STAY INFORMED',
-    heroSubtitle: 'Your story starts here — with a step toward dreams, ideas, and change.',
-    readMore: 'Read More',
-    footer: '© 2024 All rights reserved'
-  }
+type HomeContent = {
+  heroTitle: string;
+  heroSubtitle: string;
+  readMore: string;
+  voiceMatters: string;
+  newsTitle: string;
 };
 
-export default function Website() {
-  type Lang = keyof typeof translations;
-  const { lang } = useLanguage(); 
-  const t = translations[lang];
+type NewsItem = {
+  id: number;
+  title_uk: string;
+  title_en: string;
+  excerpt_uk: string;
+  excerpt_en: string;
+  main_image: string | null;
+  category_uk: string;
+  category_en: string;
+};
+
+export default function Homepage() {
+  const { lang } = useLanguage();
+  const [loading, setLoading] = useState(true);
+  const [homeContent, setHomeContent] = useState<HomeContent | null>(null);
+  const [featuredNews, setFeaturedNews] = useState<NewsItem[]>([]);
+
+  useEffect(() => {
+    fetchHomeData();
+  }, [lang]);
+
+  const fetchHomeData = async () => {
+    // Fetch homepage content
+    const { data: pageData } = await supabase
+      .from('pages')
+      .select('*')
+      .eq('id', 'home')
+      .single();
+
+    if (pageData) {
+      const content = lang === 'uk' ? pageData.content_uk : pageData.content_en;
+      setHomeContent(content);
+    }
+
+    // Fetch featured news (latest 3)
+    const { data: newsData } = await supabase
+      .from('news')
+      .select('id, title_uk, title_en, excerpt_uk, excerpt_en, main_image, category_uk, category_en')
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    if (newsData) {
+      setFeaturedNews(newsData);
+    }
+
+    setLoading(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-2xl">{lang === 'uk' ? 'Завантаження...' : 'Loading...'}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
-     
-
       {/* Hero Section */}
       <main className="flex-1 pt-20">
         <section className="relative min-h-screen flex items-center">
@@ -42,10 +83,12 @@ export default function Website() {
             <div className="bg-gray-800 rounded-lg overflow-hidden col-span-2 relative">
               <img src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=600&h=300&fit=crop" alt="" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" />
               <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-transparent flex items-center justify-center">
-                <div className="text-6xl font-bold">
-                  <span className="text-green-500">{lang === 'uk' ? 'Голос' : 'Voice'}</span>
-                  <br />
-                  <span>{lang === 'uk' ? 'Важливий' : 'Matters'}</span>
+                <div className="text-6xl font-bold text-center">
+                  {homeContent?.voiceMatters?.split(' ').map((word, i) => (
+                    <div key={i}>
+                      <span className={i === 0 ? 'text-green-500' : ''}>{word}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -60,44 +103,46 @@ export default function Website() {
               WebkitTextStroke: '2px white',
               WebkitTextFillColor: 'transparent'
             }}>
-              {t.heroTitle}
+              {homeContent?.heroTitle}
             </h1>
             <p className="text-xl mb-12 text-gray-300 max-w-xl">
-              {t.heroSubtitle}
+              {homeContent?.heroSubtitle}
             </p>
-            <button className="bg-green-500 text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-400 transition-all transform hover:scale-105">
-              {t.readMore}
-            </button>
+            <a href="/news" className="inline-block bg-green-500 text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-400 transition-all transform hover:scale-105">
+              {homeContent?.readMore}
+            </a>
           </div>
         </section>
 
         {/* News Section */}
         <section id="news" className="py-20 px-12 bg-gray-900">
-          <h2 className="text-5xl font-bold mb-12">{t.news}</h2>
+          <h2 className="text-5xl font-bold mb-12">{homeContent?.newsTitle}</h2>
           <div className="grid md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="group cursor-pointer">
+            {featuredNews.map((item) => (
+              <a key={item.id} href={`/news/${item.id}`} className="group cursor-pointer block">
                 <div className="bg-gray-800 rounded-lg overflow-hidden mb-4 h-64">
                   <img 
-                    src={`https://images.unsplash.com/photo-${1550000000000 + item * 10000000}?w=400&h=300&fit=crop`}
-                    alt={`News ${item}`}
+                    src={item.main_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=400&h=300&fit=crop'}
+                    alt={lang === 'uk' ? item.title_uk : item.title_en}
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
                   />
                 </div>
+                <div className="mb-2">
+                  <span className="text-green-500 text-sm font-bold">
+                    {lang === 'uk' ? item.category_uk : item.category_en}
+                  </span>
+                </div>
                 <h3 className="text-2xl font-bold mb-2 group-hover:text-green-500 transition-colors">
-                  {lang === 'uk' ? `Новина ${item}` : `News ${item}`}
+                  {lang === 'uk' ? item.title_uk : item.title_en}
                 </h3>
                 <p className="text-gray-400">
-                  {lang === 'uk' 
-                    ? 'Короткий опис новини, що привертає увагу читача...'
-                    : 'A brief description of the news that captures attention...'}
+                  {lang === 'uk' ? item.excerpt_uk : item.excerpt_en}
                 </p>
-              </div>
+              </a>
             ))}
           </div>
         </section>
       </main>
-
     </div>
   );
 }

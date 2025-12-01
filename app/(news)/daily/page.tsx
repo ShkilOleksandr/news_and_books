@@ -1,6 +1,7 @@
 'use client';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { use, useState } from 'react';
+import { supabase } from '@/app/lib/supabase';
 
 const translations = {
   uk: {
@@ -9,7 +10,10 @@ const translations = {
     share: 'Поділитися',
     related: 'Схожі теми',
     readMore: 'Читати далі',
-    backToHome: 'На головну'
+    backToHome: 'На головну',
+    loading: 'Завантаження...',
+    noTopic: 'Сьогодні немає щоденної теми',
+    readTime: 'хв читання'
   },
   en: {
     daily: 'Daily Topic',
@@ -17,156 +21,170 @@ const translations = {
     share: 'Share',
     related: 'Related Topics',
     readMore: 'Read More',
-    backToHome: 'Back to Home'
+    backToHome: 'Back to Home',
+    loading: 'Loading...',
+    noTopic: 'No daily topic available today',
+    readTime: 'min read'
   }
 };
 
-// Mock data for daily topic
-const dailyContent = {
-  uk: {
-    title: 'Майбутнє зеленої енергії в Україні',
-    date: '26 листопада 2024',
-    readTime: '8 хв читання',
-    content: `
-      <p>Україна стоїть на порозі енергетичної революції. З кожним днем все більше українців розуміють важливість переходу на відновлювальні джерела енергії.</p>
-      
-      <p>Сонячна енергетика показує неймовірні результати. За останній рік встановлено понад 2 ГВт нових потужностей, що робить нашу країну одним з лідерів регіону.</p>
-      
-      <p>Вітрова енергетика також не відстає. Нові вітрові парки на півдні та заході країни генерують чисту енергію для мільйонів домівок.</p>
-      
-      <p>Це не просто про екологію - це про незалежність, про майбутнє наших дітей, про економічний розвиток.</p>
-    `,
-    tags: ['Енергетика', 'Екологія', 'Майбутнє', 'Технології']
-  },
-  en: {
-    title: 'The Future of Green Energy in Ukraine',
-    date: 'November 26, 2024',
-    readTime: '8 min read',
-    content: `
-      <p>Ukraine stands on the threshold of an energy revolution. Every day, more Ukrainians understand the importance of transitioning to renewable energy sources.</p>
-      
-      <p>Solar energy shows incredible results. Over the past year, more than 2 GW of new capacity has been installed, making our country one of the regional leaders.</p>
-      
-      <p>Wind energy is not far behind. New wind farms in the south and west of the country generate clean energy for millions of homes.</p>
-      
-      <p>This is not just about ecology - it's about independence, about our children's future, about economic development.</p>
-    `,
-    tags: ['Energy', 'Ecology', 'Future', 'Technology']
-  }
+type DailyTopic = {
+  id: number;
+  title_uk: string;
+  title_en: string;
+  content_uk: string;
+  content_en: string;
+  main_image: string | null;
+  read_time: number;
+  date: string;
 };
 
-const relatedTopics = [
-  {
-    title_uk: 'Сонячні панелі для дому',
-    title_en: 'Solar Panels for Home',
-    image: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=400&h=300&fit=crop'
-  },
-  {
-    title_uk: 'Електромобілі в Україні',
-    title_en: 'Electric Cars in Ukraine',
-    image: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=400&h=300&fit=crop'
-  },
-  {
-    title_uk: 'Енергоефективність міст',
-    title_en: 'Energy Efficiency of Cities',
-    image: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400&h=300&fit=crop'
-  }
-];
 
 export default function DailyTopicPage() {
-  const { lang } = useLanguage(); 
+  const { lang } = useLanguage();
   const t = translations[lang];
-  const content = dailyContent[lang];
+  const [loading, setLoading] = useState(true);
+  const [topic, setTopic] = useState<DailyTopic | null>(null);
 
-  return (
-    <div className="min-h-screen bg-black text-white">
+  useEffect(() => {
+    fetchDailyTopic();
+  }, []);
 
-      {/* Main Content */}
-      <main className="pt-24 pb-20">
-        <div className="max-w-4xl mx-auto px-6">
-          {/* Back Button */}
-          <a href="/" className="inline-flex items-center text-green-500 hover:text-green-400 mb-8 transition-colors">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
+  
+const [relatedTopics, setRelatedTopics] = useState<DailyTopic[]>([]);
+
+const fetchDailyTopic = async () => {
+  // Get today's topic
+  const { data, error } = await supabase
+    .from('daily_topics')
+    .select('*')
+    .lte('date', new Date().toISOString().split('T')[0])
+    .order('date', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (data && !error) {
+    setTopic(data);
+    
+    // Fetch 3 other recent topics as related
+    const { data: related } = await supabase
+      .from('daily_topics')
+      .select('id, title_uk, title_en, main_image')
+      .neq('id', data.id) // Exclude current topic
+      .order('date', { ascending: false })
+      .limit(3);
+    
+    if (related) {
+      setRelatedTopics(related);
+    }
+  }
+  setLoading(false);
+};
+
+  if (!topic) {
+    return (
+      <div className="min-h-screen bg-black text-white pt-24 pb-20">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h1 className="text-4xl font-bold mb-4">{t.noTopic}</h1>
+          <a href="/" className="text-green-500 hover:text-green-400">
             {t.backToHome}
           </a>
+        </div>
+      </div>
+    );
+  }
 
-          {/* Category Badge */}
-          <div className="inline-block bg-green-500 text-black px-4 py-1 rounded-full font-bold text-sm mb-12">
-            {t.daily}
-          </div>
+  const title = lang === 'uk' ? topic.title_uk : topic.title_en;
+  const content = lang === 'uk' ? topic.content_uk : topic.content_en;
 
-          {/* Title */}
-          <h1 className="text-6xl font-bold mb-6 leading-tight">
-            {content.title}
-          </h1>
+  return (
+    <div className="min-h-screen bg-black text-white pt-24 pb-20">
+      <div className="max-w-4xl mx-auto px-6">
+        {/* Back Button */}
+        <a href="/" className="inline-flex items-center text-green-500 hover:text-green-400 mb-8 transition-colors">
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          {t.backToHome}
+        </a>
 
-          {/* Meta Info */}
-          <div className="flex items-center gap-6 text-gray-400 mb-12 pb-8 border-b border-gray-800">
-            <span>{content.date}</span>
-            <span>•</span>
-            <span>{content.readTime}</span>
-            <button className="ml-auto flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-              </svg>
-              {t.share}
-            </button>
-          </div>
+        {/* Category Badge */}
+        <div className="inline-block bg-green-500 text-black px-4 py-1 rounded-full font-bold text-sm mb-12">
+          {t.daily}
+        </div>
 
-          {/* Hero Image */}
+        {/* Title */}
+        <h1 className="text-6xl font-bold mb-6 leading-tight">
+          {title}
+        </h1>
+
+        {/* Meta Info */}
+        <div className="flex items-center gap-6 text-gray-400 mb-12 pb-8 border-b border-gray-800">
+          <span suppressHydrationWarning>{new Date(topic.date).toLocaleDateString()}</span>
+          {topic.read_time && (
+            <>
+              <span>•</span>
+              <span>{topic.read_time} {t.readTime}</span>
+            </>
+          )}
+          <button className="ml-auto flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            {t.share}
+          </button>
+        </div>
+
+        {/* Hero Image */}
+        {topic.main_image && (
           <div className="mb-12 rounded-2xl overflow-hidden">
             <img 
-              src="https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200&h=600&fit=crop"
-              alt={content.title}
+              src={topic.main_image}
+              alt={title}
               className="w-full h-96 object-cover"
             />
           </div>
+        )}
 
-          {/* Article Content */}
-          <article className="prose prose-invert prose-lg max-w-none mb-16">
-            <div 
-              dangerouslySetInnerHTML={{ __html: content.content }}
-              className="text-gray-300 leading-relaxed space-y-6"
-            />
-          </article>
+        {/* Article Content */}
+        <article className="prose prose-invert prose-lg max-w-none mb-16">
+          <div 
+            dangerouslySetInnerHTML={{ __html: content }}
+            className="text-gray-300 leading-relaxed space-y-6"
+          />
+        </article>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-3 mb-16">
-            {content.tags.map((tag, index) => (
-              <span 
-                key={index}
-                className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-full text-sm transition-colors cursor-pointer"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-
-          {/* Related Topics */}
-          <section>
-            <h2 className="text-4xl font-bold mb-8">{t.related}</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              {relatedTopics.map((topic, index) => (
-                <div key={index} className="group cursor-pointer">
+        {/* Related Topics */}
+<section>
+  <h2 className="text-4xl font-bold mb-8">{t.related}</h2>
+  {relatedTopics.length > 0 ? (
+    <div className="grid md:grid-cols-3 gap-6">
+      {relatedTopics.map((item) => (
+        <a 
+          key={item.id}
+          href={`/daily`}
+          className="group cursor-pointer"
+                >
                   <div className="bg-gray-800 rounded-lg overflow-hidden mb-4 h-48">
                     <img 
-                      src={topic.image}
-                      alt={lang === 'uk' ? topic.title_uk : topic.title_en}
+                      src={item.main_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=400&h=300&fit=crop'}
+                      alt={lang === 'uk' ? item.title_uk : item.title_en}
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
                     />
                   </div>
                   <h3 className="text-xl font-bold group-hover:text-green-500 transition-colors">
-                    {lang === 'uk' ? topic.title_uk : topic.title_en}
+                    {lang === 'uk' ? item.title_uk : item.title_en}
                   </h3>
-                </div>
+                </a>
               ))}
             </div>
-          </section>
-        </div>
-      </main>
-
+          ) : (
+            <p className="text-gray-400">
+              {lang === 'uk' ? 'Немає інших тем' : 'No other topics'}
+            </p>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

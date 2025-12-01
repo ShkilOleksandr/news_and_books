@@ -24,38 +24,22 @@ type NewsArticle = {
   author_image?: string;
 };
 
-const relatedArticles = [
-  {
-    id: 2,
-    title_uk: 'Електромобілі в Україні',
-    title_en: 'Electric Cars in Ukraine',
-    image: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=400&h=300&fit=crop',
-    category_uk: 'Технології',
-    category_en: 'Technology'
-  },
-  {
-    id: 3,
-    title_uk: 'Сонячна енергетика',
-    title_en: 'Solar Energy',
-    image: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=400&h=300&fit=crop',
-    category_uk: 'Екологія',
-    category_en: 'Environment'
-  },
-  {
-    id: 4,
-    title_uk: 'Цифрова трансформація бізнесу',
-    title_en: 'Digital Business Transformation',
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop',
-    category_uk: 'Бізнес',
-    category_en: 'Business'
-  }
-];
+
 
 export default function NewsArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const { lang } = useLanguage();
   
   const [article, setArticle] = useState<NewsArticle | null>(null);
+  type RelatedArticle = {
+    id: number;
+    title_uk: string;
+    title_en: string;
+    main_image: string | null;
+    category_uk: string;
+    category_en: string;
+  };
+  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]); // Add this
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -79,6 +63,19 @@ export default function NewsArticlePage({ params }: { params: Promise<{ id: stri
     }
 
     setArticle(data);
+    
+    // Fetch related articles from the same category
+    const { data: related } = await supabase
+      .from('news')
+      .select('id, title_uk, title_en, main_image, category_uk, category_en')
+      .eq('category_uk', data.category_uk)
+      .neq('id', resolvedParams.id) // Exclude current article
+      .limit(3);
+    
+    if (related) {
+      setRelatedArticles(related);
+    }
+    
     setLoading(false);
   };
 
@@ -221,37 +218,43 @@ export default function NewsArticlePage({ params }: { params: Promise<{ id: stri
           </div>
         )}
 
-        {/* Related Articles */}
-        <section>
-          <h2 className="text-4xl font-bold mb-8">
-            {lang === 'uk' ? 'Схожі статті' : 'Related Articles'}
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {relatedArticles.map((item) => (
-              <a 
-                key={item.id}
-                href={`/news/${item.id}`}
-                className="group cursor-pointer"
-              >
-                <div className="bg-gray-800 rounded-lg overflow-hidden mb-4 h-48">
-                  <img 
-                    src={item.image}
-                    alt={lang === 'uk' ? item.title_uk : item.title_en}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
-                  />
-                </div>
-                <div className="mb-2">
-                  <span className="text-green-500 text-sm font-bold">
-                    {lang === 'uk' ? item.category_uk : item.category_en}
-                  </span>
-                </div>
-                <h3 className="text-xl font-bold group-hover:text-green-500 transition-colors">
-                  {lang === 'uk' ? item.title_uk : item.title_en}
-                </h3>
-              </a>
-            ))}
-          </div>
-        </section>
+          {/* Related Articles */}
+          <section>
+            <h2 className="text-4xl font-bold mb-8">
+              {lang === 'uk' ? 'Схожі статті' : 'Related Articles'}
+            </h2>
+            {relatedArticles.length > 0 ? (
+              <div className="grid md:grid-cols-3 gap-8">
+                {relatedArticles.map((item) => (
+                  <a 
+                    key={item.id}
+                    href={`/news/${item.id}`}
+                    className="group cursor-pointer"
+                  >
+                    <div className="bg-gray-800 rounded-lg overflow-hidden mb-4 h-48">
+                      <img 
+                        src={item.main_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=400&h=300&fit=crop'}
+                        alt={lang === 'uk' ? item.title_uk : item.title_en}
+                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <span className="text-green-500 text-sm font-bold">
+                        {lang === 'uk' ? item.category_uk : item.category_en}
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-bold group-hover:text-green-500 transition-colors">
+                      {lang === 'uk' ? item.title_uk : item.title_en}
+                    </h3>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400">
+                {lang === 'uk' ? 'Немає схожих статей' : 'No related articles'}
+              </p>
+            )}
+          </section>
       </article>
     </div>
   );

@@ -148,6 +148,11 @@ export default function AdminDashboard() {
           >
             {t.createNewArticle}
           </a>
+          <a  href="/admin/daily"
+            className="bg-gray-800 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-700 transition-colors"
+          >
+            {lang === 'uk' ? 'Щоденні теми' : 'Daily Topics'}
+          </a>
           <a
             href="/admin/pages"
             className="bg-gray-800 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-700 transition-colors"
