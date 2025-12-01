@@ -159,6 +159,11 @@ export default function AdminDashboard() {
           >
             {lang === 'uk' ? 'Редагувати сторінки' : 'Edit Pages'}
           </a>
+          <a href="/admin/forum-categories"
+            className="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg px-6 py-3 text-white font-bold transition-colors"
+          >
+            {lang === 'uk' ? 'Категорії форуму' : 'Forum Categories'}
+          </a>
         </div>
 
     
