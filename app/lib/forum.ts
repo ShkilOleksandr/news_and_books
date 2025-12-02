@@ -1,24 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
-import type {
-  ForumCategory,
-  ForumThread,
-  ForumPost,
-  CreateThreadData,
-  CreatePostData,
-  UpdateThreadData,
-  UpdatePostData,
-} from '../types/forum';
 
-// Initialize Supabase client
-// Make sure you have NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
-
-// ============== CATEGORIES ==============
-
-export async function getForumCategories(): Promise<ForumCategory[]> {
+// Get all forum categories
+export async function getForumCategories() {
   const { data, error } = await supabase
     .from('forum_categories')
     .select('*')
@@ -28,7 +15,8 @@ export async function getForumCategories(): Promise<ForumCategory[]> {
   return data || [];
 }
 
-export async function getForumCategoryBySlug(slug: string): Promise<ForumCategory | null> {
+// Get category by slug
+export async function getForumCategoryBySlug(slug: string) {
   const { data, error } = await supabase
     .from('forum_categories')
     .select('*')
@@ -39,15 +27,11 @@ export async function getForumCategoryBySlug(slug: string): Promise<ForumCategor
   return data;
 }
 
-// ============== THREADS ==============
-
-export async function getThreadsByCategory(
-  categoryId: number,
-  page: number = 1,
-  limit: number = 20
-): Promise<{ threads: ForumThread[]; total: number }> {
-  const from = (page - 1) * limit;
-  const to = from + limit - 1;
+// Get threads by category with pagination
+export async function getThreadsByCategory(categoryId: number, page: number = 1) {
+  const itemsPerPage = 20;
+  const from = (page - 1) * itemsPerPage;
+  const to = from + itemsPerPage - 1;
 
   // Get total count
   const { count } = await supabase
@@ -55,16 +39,13 @@ export async function getThreadsByCategory(
     .select('*', { count: 'exact', head: true })
     .eq('category_id', categoryId);
 
-  // Get threads with category info
+  // Get threads
   const { data, error } = await supabase
     .from('forum_threads')
-    .select(`
-      *,
-      category:forum_categories(*)
-    `)
+    .select('*')
     .eq('category_id', categoryId)
     .order('is_pinned', { ascending: false })
-    .order('updated_at', { ascending: false })
+    .order('created_at', { ascending: false })
     .range(from, to);
 
   if (error) throw error;
@@ -75,7 +56,8 @@ export async function getThreadsByCategory(
   };
 }
 
-export async function getThreadById(threadId: number): Promise<ForumThread | null> {
+// Get thread by ID with category info
+export async function getThreadById(threadId: number) {
   const { data, error } = await supabase
     .from('forum_threads')
     .select(`
@@ -89,20 +71,20 @@ export async function getThreadById(threadId: number): Promise<ForumThread | nul
   return data;
 }
 
-export async function createThread(
-  threadData: CreateThreadData,
-  userId: string,
-  username: string,
-  userEmail?: string
-): Promise<ForumThread> {
+// Create a new thread (BILINGUAL VERSION)
+export async function createThread(threadData: {
+  category_id: number;
+  user_id: string;
+  username: string;
+  user_email: string;
+  title_uk: string;
+  title_en: string;
+  content_uk: string;
+  content_en: string;
+}) {
   const { data, error } = await supabase
     .from('forum_threads')
-    .insert({
-      ...threadData,
-      user_id: userId,
-      username,
-      user_email: userEmail,
-    })
+    .insert([threadData])
     .select()
     .single();
 
@@ -110,13 +92,16 @@ export async function createThread(
   return data;
 }
 
-export async function updateThread(
-  threadId: number,
-  updateData: UpdateThreadData
-): Promise<ForumThread> {
+// Update a thread
+export async function updateThread(threadId: number, updates: {
+  title_uk?: string;
+  title_en?: string;
+  content_uk?: string;
+  content_en?: string;
+}) {
   const { data, error } = await supabase
     .from('forum_threads')
-    .update(updateData)
+    .update(updates)
     .eq('id', threadId)
     .select()
     .single();
@@ -125,7 +110,8 @@ export async function updateThread(
   return data;
 }
 
-export async function deleteThread(threadId: number): Promise<void> {
+// Delete a thread
+export async function deleteThread(threadId: number) {
   const { error } = await supabase
     .from('forum_threads')
     .delete()
@@ -134,7 +120,8 @@ export async function deleteThread(threadId: number): Promise<void> {
   if (error) throw error;
 }
 
-export async function incrementThreadViews(threadId: number): Promise<void> {
+// Increment thread view count
+export async function incrementThreadViews(threadId: number) {
   const { error } = await supabase.rpc('increment_thread_views', {
     thread_id: threadId,
   });
@@ -156,15 +143,11 @@ export async function incrementThreadViews(threadId: number): Promise<void> {
   }
 }
 
-// ============== POSTS ==============
-
-export async function getPostsByThread(
-  threadId: number,
-  page: number = 1,
-  limit: number = 20
-): Promise<{ posts: ForumPost[]; total: number }> {
-  const from = (page - 1) * limit;
-  const to = from + limit - 1;
+// Get posts by thread with pagination
+export async function getPostsByThread(threadId: number, page: number = 1) {
+  const itemsPerPage = 20;
+  const from = (page - 1) * itemsPerPage;
+  const to = from + itemsPerPage - 1;
 
   // Get total count
   const { count } = await supabase
@@ -188,20 +171,18 @@ export async function getPostsByThread(
   };
 }
 
-export async function createPost(
-  postData: CreatePostData,
-  userId: string,
-  username: string,
-  userEmail?: string
-): Promise<ForumPost> {
+// Create a new post (BILINGUAL VERSION)
+export async function createPost(postData: {
+  thread_id: number;
+  user_id: string;
+  username: string;
+  user_email: string;
+  content_uk: string;
+  content_en: string;
+}) {
   const { data, error } = await supabase
     .from('forum_posts')
-    .insert({
-      ...postData,
-      user_id: userId,
-      username,
-      user_email: userEmail,
-    })
+    .insert([postData])
     .select()
     .single();
 
@@ -209,14 +190,15 @@ export async function createPost(
   return data;
 }
 
-export async function updatePost(
-  postId: number,
-  updateData: UpdatePostData
-): Promise<ForumPost> {
+// Update a post
+export async function updatePost(postId: number, updates: {
+  content_uk?: string;
+  content_en?: string;
+}) {
   const { data, error } = await supabase
     .from('forum_posts')
     .update({
-      ...updateData,
+      ...updates,
       is_edited: true,
       edited_at: new Date().toISOString(),
     })
@@ -228,7 +210,8 @@ export async function updatePost(
   return data;
 }
 
-export async function deletePost(postId: number): Promise<void> {
+// Delete a post
+export async function deletePost(postId: number) {
   const { error } = await supabase
     .from('forum_posts')
     .delete()
@@ -237,9 +220,8 @@ export async function deletePost(postId: number): Promise<void> {
   if (error) throw error;
 }
 
-// ============== USER STATS ==============
-
-export async function getUserThreadCount(userId: string): Promise<number> {
+// Get user's thread count
+export async function getUserThreadCount(userId: string) {
   const { count, error } = await supabase
     .from('forum_threads')
     .select('*', { count: 'exact', head: true })
@@ -249,7 +231,8 @@ export async function getUserThreadCount(userId: string): Promise<number> {
   return count || 0;
 }
 
-export async function getUserPostCount(userId: string): Promise<number> {
+// Get user's post count
+export async function getUserPostCount(userId: string) {
   const { count, error } = await supabase
     .from('forum_posts')
     .select('*', { count: 'exact', head: true })

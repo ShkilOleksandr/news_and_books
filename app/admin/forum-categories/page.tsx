@@ -371,4 +371,4 @@ export default function ForumCategoriesAdmin() {
       </main>
     </div>
   );
-}
+}   

@@ -7,14 +7,16 @@ const translations = {
     daily: 'Щоденна тема',
     news: 'Новини',
     about: 'Про нас',
-    contact: 'Контакти'
+    contact: 'Контакти',
+    forum: 'Форум'
   },
   en: {
     home: 'Home',
     daily: 'Daily Topic',
     news: 'News',
     about: 'About',
-    contact: 'Contact'
+    contact: 'Contact',
+    forum: 'Forum'
   }
 };
 
@@ -40,6 +42,7 @@ export default function Header() {
           <a href="/news" className="hover:text-green-500 transition-colors text-lg">{t.news}</a>
           <a href="/about" className="hover:text-green-500 transition-colors text-lg">{t.about}</a>
           <a href="/contact" className="hover:text-green-500 transition-colors text-lg">{t.contact}</a>
+          <a href="/forum" className="hover:text-green-500 transition-colors text-lg">{t.forum}</a>
           
           {/* Language Switcher */}
           <div className="flex gap-2 ml-4">
