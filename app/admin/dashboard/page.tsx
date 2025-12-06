@@ -11,6 +11,11 @@ const translations = {
     logout: 'Вийти',
     dashboard: 'Панель управління',
     createNewArticle: '+ Створити статтю',
+    dailyTopics: 'Щоденні теми',
+    editPages: 'Редагувати сторінки',
+    forumCategories: 'Категорії форуму',
+    documentArchive: 'Архів документів',
+    talents: 'Таланти',
     totalArticles: 'Всього статей',
     featured: 'Обране',
     loggedInAs: 'Ви увійшли як',
@@ -26,6 +31,11 @@ const translations = {
     logout: 'Logout',
     dashboard: 'Dashboard',
     createNewArticle: '+ Create New Article',
+    dailyTopics: 'Daily Topics',
+    editPages: 'Edit Pages',
+    forumCategories: 'Forum Categories',
+    documentArchive: 'Document Archive',
+    talents: 'Talents',
     totalArticles: 'Total Articles',
     featured: 'Featured',
     loggedInAs: 'Logged in as',
@@ -115,10 +125,10 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">K</div>
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">Y</div>
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">R</div>
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">S</div>
+              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold text-black">K</div>
+              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold text-black">Y</div>
+              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold text-black">R</div>
+              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold text-black">S</div>
             </div>
             <span className="text-gray-400">{t.adminPanel}</span>
           </div>
@@ -139,93 +149,113 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold">{t.dashboard}</h1>
-          
+        {/* Title */}
+        <h1 className="text-4xl font-bold mb-8">{t.dashboard}</h1>
+
+        {/* Action Buttons Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
           <a
             href="/admin/news/create"
-            className="bg-green-500 text-black px-6 py-3 rounded-lg font-bold hover:bg-green-400 transition-colors"
+            className="bg-green-500 text-black px-6 py-4 rounded-lg font-bold hover:bg-green-400 transition-colors text-center"
           >
             {t.createNewArticle}
           </a>
-          <a  href="/admin/daily"
-            className="bg-gray-800 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-700 transition-colors"
+          <a
+            href="/admin/daily"
+            className="bg-gray-800 text-white px-6 py-4 rounded-lg font-bold hover:bg-gray-700 border border-gray-700 transition-colors text-center"
           >
-            {lang === 'uk' ? 'Щоденні теми' : 'Daily Topics'}
+            {t.dailyTopics}
           </a>
           <a
             href="/admin/pages"
-            className="bg-gray-800 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-700 transition-colors"
+            className="bg-gray-800 text-white px-6 py-4 rounded-lg font-bold hover:bg-gray-700 border border-gray-700 transition-colors text-center"
           >
-            {lang === 'uk' ? 'Редагувати сторінки' : 'Edit Pages'}
+            {t.editPages}
           </a>
-          <a href="/admin/forum-categories"
-            className="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg px-6 py-3 text-white font-bold transition-colors"
+          <a
+            href="/admin/forum-categories"
+            className="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg px-6 py-4 text-white font-bold transition-colors text-center"
           >
-            {lang === 'uk' ? 'Категорії форуму' : 'Forum Categories'}
+            {t.forumCategories}
+          </a>
+          <a
+            href="/admin/archive"
+            className="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg px-6 py-4 text-white font-bold transition-colors text-center"
+          >
+            {t.documentArchive}
+          </a>
+          <a
+            href="/admin/talents"
+            className="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg px-6 py-4 text-white font-bold transition-colors text-center"
+          >
+            {t.talents}
           </a>
         </div>
 
-    
-
         {/* Stats */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-gray-900 p-6 rounded-xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="bg-gray-900 border border-gray-800 p-6 rounded-xl">
             <div className="text-gray-400 mb-2">{t.totalArticles}</div>
             <div className="text-4xl font-bold">{news.length}</div>
           </div>
-          <div className="bg-gray-900 p-6 rounded-xl">
+          <div className="bg-gray-900 border border-gray-800 p-6 rounded-xl">
             <div className="text-gray-400 mb-2">{t.featured}</div>
             <div className="text-4xl font-bold">{news.filter(n => n.featured).length}</div>
           </div>
-          <div className="bg-gray-900 p-6 rounded-xl">
+          <div className="bg-gray-900 border border-gray-800 p-6 rounded-xl">
             <div className="text-gray-400 mb-2">{t.loggedInAs}</div>
             <div className="text-lg font-bold truncate">{user.email}</div>
           </div>
         </div>
 
         {/* Articles List */}
-        <div className="bg-gray-900 rounded-xl overflow-hidden">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
           <div className="p-6 border-b border-gray-800">
             <h2 className="text-2xl font-bold">{t.recentArticles}</h2>
           </div>
           
           <div className="divide-y divide-gray-800">
-            {news.map((item) => (
-              <div key={item.id} className="p-6 flex items-center justify-between hover:bg-gray-800 transition-colors">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-bold">
-                      {lang === 'uk' ? item.title_uk : item.title_en}
-                    </h3>
-                    {item.featured && (
-                      <span className="bg-green-500 text-black px-2 py-1 rounded text-xs font-bold">
-                        {t.featured.toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
-                    <span>{lang === 'uk' ? item.category_uk : item.category_en}</span>
-                    <span>•</span>
-                    <span>{new Date(item.created_at).toLocaleDateString()}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <a
-                    href={`/admin/news/${item.id}/edit`}
-                    className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors"
-                  >
-                    {t.edit}
-                  </a>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="bg-red-500/20 hover:bg-red-500/30 text-red-500 px-4 py-2 rounded-lg transition-colors"
-                  >
-                    {t.delete}
-                  </button>
-                </div>
+            {news.length === 0 ? (
+              <div className="p-12 text-center text-gray-400">
+                {lang === 'uk' ? 'Немає статей' : 'No articles yet'}
               </div>
-            ))}
+            ) : (
+              news.map((item) => (
+                <div key={item.id} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-gray-800 transition-colors">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      <h3 className="text-lg font-bold">
+                        {lang === 'uk' ? item.title_uk : item.title_en}
+                      </h3>
+                      {item.featured && (
+                        <span className="bg-green-500 text-black px-2 py-1 rounded text-xs font-bold">
+                          {t.featured.toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-gray-400 flex-wrap">
+                      <span>{lang === 'uk' ? item.category_uk : item.category_en}</span>
+                      <span>•</span>
+                      <span>{new Date(item.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <a
+                      href={`/admin/news/${item.id}/edit`}
+                      className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors text-sm font-semibold"
+                    >
+                      {t.edit}
+                    </a>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="bg-red-500/20 hover:bg-red-500/30 text-red-500 px-4 py-2 rounded-lg transition-colors text-sm font-semibold"
+                    >
+                      {t.delete}
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </main>
