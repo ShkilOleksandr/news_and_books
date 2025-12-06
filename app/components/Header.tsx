@@ -11,7 +11,8 @@ const translations = {
     about: 'Про нас',
     contact: 'Контакти',
     forum: 'Форум',
-    archive: 'Архів'
+    archive: 'Архів',
+    talents: 'Таланти'
   },
   en: {
     home: 'Home',
@@ -20,7 +21,8 @@ const translations = {
     about: 'About',
     contact: 'Contact',
     forum: 'Forum',
-    archive: 'Archive'
+    archive: 'Archive',
+    talents: 'Talents'
   }
 };
 
@@ -45,6 +47,7 @@ export default function Header() {
             <a href="/" className="hover:text-green-500 transition-colors text-base font-medium whitespace-nowrap">{t.home}</a>
             <a href="/daily" className="hover:text-green-500 transition-colors text-base font-medium whitespace-nowrap">{t.daily}</a>
             <a href="/news" className="hover:text-green-500 transition-colors text-base font-medium whitespace-nowrap">{t.news}</a>
+            <a href="/talents" className="hover:text-green-500 transition-colors text-base font-medium whitespace-nowrap">{t.talents}</a>
             <a href="/forum" className="hover:text-green-500 transition-colors text-base font-medium whitespace-nowrap">{t.forum}</a>
             <a href="/archive" className="hover:text-green-500 transition-colors text-base font-medium whitespace-nowrap">{t.archive}</a>
             <a href="/about" className="hover:text-green-500 transition-colors text-base font-medium whitespace-nowrap">{t.about}</a>

@@ -9,6 +9,9 @@ import type { ForumThread, ForumPost } from '@/app/types/forum';
 import { formatDistanceToNow, format } from 'date-fns';
 import { uk, enUS } from 'date-fns/locale';
 import ReplyForm from '@/app/components/forum/ReplyForm';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
+import { useUserBanStatus } from '@/app/lib/useuserbanstatus';
+import BannedMessage from '@/app/components/Bannedmessage';
 import { 
   useIsAdmin, 
   adminPinThread, 
@@ -162,17 +165,13 @@ export default function ThreadDetailPage() {
 
   const totalPages = Math.ceil(total / 20);
 
-  if (isLoading || adminLoading) {
-    return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center">
-            <p className="text-gray-400 text-2xl">{t.loading}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+    const { isBanned, reason, bannedAt, loading } = useUserBanStatus();
+    if (loading) return <LoadingSpinner />;
+    
+    // ADD THIS:
+    if (isBanned) {
+      return <BannedMessage reason={reason} bannedAt={bannedAt} />;
+    }
 
   if (!thread || !thread.category) {
     return (

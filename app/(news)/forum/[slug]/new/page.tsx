@@ -7,6 +7,9 @@ import { useParams } from 'next/navigation';
 import { getForumCategoryBySlug } from '@/app/lib/forum';
 import type { ForumCategory } from '@/app/types/forum';
 import NewThreadForm from '@/app/components/forum/NewThreadForm';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
+import { useUserBanStatus } from '@/app/lib/useuserbanstatus';
+import BannedMessage from '@/app/components/Bannedmessage';
 
 const translations = {
   uk: {
@@ -47,18 +50,14 @@ export default function NewThreadPage() {
     }
     loadCategory();
   }, [slug]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center">
-            <p className="text-gray-400 text-2xl">{t.loading}</p>
-          </div>
-        </div>
-      </div>
-    );
+  const { isBanned, reason, bannedAt, loading } = useUserBanStatus();
+  if (loading) return <LoadingSpinner />;
+  
+  // ADD THIS:
+  if (isBanned) {
+    return <BannedMessage reason={reason} bannedAt={bannedAt} />;
   }
+
 
   if (!category) {
     return (
