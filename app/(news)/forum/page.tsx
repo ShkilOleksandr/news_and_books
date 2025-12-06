@@ -5,6 +5,7 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import { useEffect, useState } from 'react';
 import { getForumCategories } from '@/app/lib/forum';
 import type { ForumCategory } from '@/app/types/forum';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 const translations = {
   uk: {
@@ -42,15 +43,7 @@ export default function ForumPage() {
   }, []);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center">
-            <p className="text-gray-400 text-2xl">{t.loading}</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (

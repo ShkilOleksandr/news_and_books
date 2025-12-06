@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../lib/supabase';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const translations = {
   uk: {
@@ -106,13 +107,7 @@ export default function ContactPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-20">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <div className="text-2xl">{t.loading}</div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (

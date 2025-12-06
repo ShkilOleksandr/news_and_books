@@ -5,6 +5,7 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import { supabase } from '@/app/lib/supabase';
 import type { ArchiveDocument, ArchiveCategory } from '@/app/types/archive';
 import Link from 'next/link';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 const translations = {
   uk: {
@@ -156,9 +157,7 @@ export default function ArchivePage() {
 
           {/* Loading */}
           {loading && (
-            <div className="text-center text-gray-400 text-2xl py-20">
-              {t.loading}
-            </div>
+            <LoadingSpinner fullScreen={false} size="md" />
           )}
 
           {/* Documents Grid */}

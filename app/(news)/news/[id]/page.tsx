@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { use } from 'react';
 import { supabase } from '@/app/lib/supabase';
 import { useLanguage } from '@/app/context/LanguageContext';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 type NewsArticle = {
   id: number;
@@ -80,13 +81,7 @@ export default function NewsArticlePage({ params }: { params: Promise<{ id: stri
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-20">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <div className="text-2xl">{lang === 'uk' ? 'Завантаження...' : 'Loading...'}</div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (notFound || !article) {

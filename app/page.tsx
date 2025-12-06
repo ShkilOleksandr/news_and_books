@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from './context/LanguageContext';
 import { supabase } from './lib/supabase';
+import LoadingSpinner from './components/LoadingSpinner';
 
 type HomeContent = {
   heroTitle: string;
@@ -60,11 +61,7 @@ export default function Homepage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-2xl">{lang === 'uk' ? 'Завантаження...' : 'Loading...'}</div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (

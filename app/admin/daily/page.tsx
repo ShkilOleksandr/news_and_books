@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/app/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/app/context/LanguageContext';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 const translations = {
   uk: {
@@ -76,11 +77,7 @@ export default function AdminDailyTopicsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-2xl">{t.loading}</div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
