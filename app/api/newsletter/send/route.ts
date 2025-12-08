@@ -9,10 +9,6 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('Missing Supabase environment variables');
-}
-
 const supabase = createClient(
   supabaseUrl || '',
   supabaseServiceKey || ''
@@ -23,22 +19,13 @@ export async function POST(request: NextRequest) {
     // Check if Resend is configured
     if (!process.env.RESEND_API_KEY) {
       return NextResponse.json(
-        { error: 'Resend API key not configured. Please add RESEND_API_KEY to .env.local' },
+        { error: 'Resend API key not configured' },
         { status: 500 }
       );
     }
 
     // Parse request body
-    let body;
-    try {
-      body = await request.json();
-    } catch (e) {
-      return NextResponse.json(
-        { error: 'Invalid JSON in request body' },
-        { status: 400 }
-      );
-    }
-
+    const body = await request.json();
     const { subject, content, htmlContent } = body;
 
     // Validate input
@@ -49,10 +36,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('📧 ===== NEWSLETTER SEND REQUEST =====');
+    console.log('Subject:', subject);
+    console.log('Content length:', content.length);
+
     // Get all active subscribers
     const { data: subscribers, error: dbError } = await supabase
       .from('newsletter_subscribers')
-      .select('email')
+      .select('email, id')
       .eq('is_active', true);
 
     if (dbError) {
@@ -70,49 +61,67 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send emails in batches
-    const batchSize = 50; // Reduced batch size for safety
+    console.log('📊 Found', subscribers.length, 'active subscribers');
+    console.log('📋 Emails:', subscribers.map(s => s.email).join(', '));
+
+    // Send emails one by one with detailed logging
+    const results = [];
     let sentCount = 0;
     let errorCount = 0;
-    const errors: string[] = [];
 
-    for (let i = 0; i < subscribers.length; i += batchSize) {
-      const batch = subscribers.slice(i, i + batchSize);
+    for (const subscriber of subscribers) {
+      try {
+        console.log(`\n📤 Sending to: ${subscriber.email}`);
+        
+        const result = await resend.emails.send({
+          from: 'KYRS Newsletter <onboarding@resend.dev>',
+          to: subscriber.email,
+          subject: subject,
+          html: htmlContent || `<div style="font-family: Arial, sans-serif; padding: 20px;"><p>${content.replace(/\n/g, '<br>')}</p></div>`,
+        });
 
-      const emailPromises = batch.map(async (subscriber) => {
-        try {
-          await resend.emails.send({
-            from: 'KYRS Newsletter <onboarding@resend.dev>', // Default Resend email
-            to: subscriber.email,
-            subject: subject,
-            html: htmlContent || `<div style="font-family: Arial, sans-serif;"><p>${content.replace(/\n/g, '<br>')}</p></div>`,
-          });
-          sentCount++;
-        } catch (error: any) {
-          console.error(`Failed to send to ${subscriber.email}:`, error);
-          errorCount++;
-          errors.push(`${subscriber.email}: ${error.message}`);
+        if (result.error) {
+          throw new Error(result.error.message);
         }
-      });
 
-      await Promise.all(emailPromises);
+        console.log(`✅ SUCCESS for ${subscriber.email}:`, result);
+        sentCount++;
+        results.push({
+          email: subscriber.email,
+          status: 'success',
+          id: result.data?.id
+        });
 
-      // Wait between batches to avoid rate limits
-      if (i + batchSize < subscribers.length) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Small delay between emails to avoid rate limits
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+      } catch (error: any) {
+        console.error(`❌ FAILED for ${subscriber.email}:`, error);
+        errorCount++;
+        results.push({
+          email: subscriber.email,
+          status: 'failed',
+          error: error.message
+        });
       }
     }
+
+    console.log('\n📊 ===== SEND SUMMARY =====');
+    console.log('Total subscribers:', subscribers.length);
+    console.log('Sent successfully:', sentCount);
+    console.log('Failed:', errorCount);
+    console.log('Results:', results);
 
     return NextResponse.json({
       success: true,
       sent: sentCount,
       failed: errorCount,
       total: subscribers.length,
-      errors: errors.length > 0 ? errors.slice(0, 5) : undefined // Only return first 5 errors
+      details: results
     });
 
   } catch (error: any) {
-    console.error('Newsletter send error:', error);
+    console.error('❌ Newsletter send error:', error);
     return NextResponse.json(
       { 
         error: 'Failed to send newsletter: ' + error.message,
@@ -123,14 +132,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Add OPTIONS handler for CORS
-export async function OPTIONS(request: NextRequest) {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
+export async function GET(request: NextRequest) {
+  return NextResponse.json({
+    status: 'ok',
+    message: 'Newsletter API is running',
+    resendConfigured: !!process.env.RESEND_API_KEY,
+    supabaseConfigured: !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
   });
 }

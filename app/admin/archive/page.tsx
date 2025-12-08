@@ -1,553 +1,523 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { supabase } from '@/app/lib/supabase';
-import type { ArchiveDocument, ArchiveCategory } from '@/app/types/archive';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 const translations = {
   uk: {
-    title: 'Управління архівом',
-    addDocument: '+ Додати документ',
-    titleUk: 'Назва (Українською)',
-    titleEn: 'Назва (Англійською)',
-    descriptionUk: 'Опис (Українською)',
-    descriptionEn: 'Опис (Англійською)',
+    title: 'Додати до архіву',
+    mediaType: 'Тип медіа',
+    pdf: 'PDF документ',
+    video: 'Відео',
+    audio: 'Аудіо',
+    image: 'Зображення',
+    titleField: 'Назва',
+    titlePlaceholder: 'Введіть назву...',
+    descriptionField: 'Опис',
+    descriptionPlaceholder: 'Введіть опис...',
     category: 'Категорія',
-    selectCategory: 'Оберіть категорію',
-    author: 'Автор',
-    publicationDate: 'Дата публікації',
-    document: 'Документ',
-    uploadDocument: 'Завантажити документ',
-    image: 'Зображення (обкладинка)',
+    selectCategory: 'Виберіть категорію',
+    coverImage: 'Обкладинка',
+    uploadCover: 'Завантажити обкладинку',
+    pdfFile: 'PDF файл',
+    uploadPdf: 'Завантажити PDF',
+    videoFile: 'Відео файл',
+    uploadVideo: 'Завантажити відео',
+    audioFile: 'Аудіо файл',
+    uploadAudio: 'Завантажити аудіо',
+    imageFile: 'Зображення',
     uploadImage: 'Завантажити зображення',
-    featured: 'Відзначений',
-    save: 'Зберегти',
     cancel: 'Скасувати',
-    edit: 'Редагувати',
-    delete: 'Видалити',
-    views: 'переглядів',
-    downloads: 'завантажень',
-    confirmDelete: 'Ви впевнені, що хочете видалити цей документ?',
-    creating: 'Створення...',
-    updating: 'Оновлення...',
-    uploadingDocument: 'Завантаження документа...',
-    uploadingImage: 'Завантаження зображення...',
-    errorTitle: 'Будь ласка, введіть назву українською',
-    errorUploading: 'Помилка завантаження файлу',
-    successCreated: 'Документ успішно створено',
-    successUpdated: 'Документ успішно оновлено',
-    successDeleted: 'Документ успішно видалено'
+    save: 'Зберегти',
+    uploading: 'Завантаження...',
+    errorTitle: 'Будь ласка, введіть назву',
+    errorCategory: 'Будь ласка, виберіть категорію',
+    errorFile: 'Будь ласка, завантажте файл',
+    errorCover: 'Будь ласка, завантажте обкладинку',
+    supportedFormats: 'Підтримувані формати',
+    pdfFormats: 'PDF',
+    videoFormats: 'MP4, WebM, MOV',
+    audioFormats: 'MP3, WAV, OGG',
+    imageFormats: 'JPG, PNG, WebP, GIF',
+    maxSize: 'Макс. розмір'
   },
   en: {
-    title: 'Manage Archive',
-    addDocument: '+ Add Document',
-    titleUk: 'Title (Ukrainian)',
-    titleEn: 'Title (English)',
-    descriptionUk: 'Description (Ukrainian)',
-    descriptionEn: 'Description (English)',
+    title: 'Add to Archive',
+    mediaType: 'Media Type',
+    pdf: 'PDF Document',
+    video: 'Video',
+    audio: 'Audio',
+    image: 'Image',
+    titleField: 'Title',
+    titlePlaceholder: 'Enter title...',
+    descriptionField: 'Description',
+    descriptionPlaceholder: 'Enter description...',
     category: 'Category',
     selectCategory: 'Select category',
-    author: 'Author',
-    publicationDate: 'Publication Date',
-    document: 'Document',
-    uploadDocument: 'Upload document',
-    image: 'Image (cover)',
+    coverImage: 'Cover Image',
+    uploadCover: 'Upload cover',
+    pdfFile: 'PDF File',
+    uploadPdf: 'Upload PDF',
+    videoFile: 'Video File',
+    uploadVideo: 'Upload video',
+    audioFile: 'Audio File',
+    uploadAudio: 'Upload audio',
+    imageFile: 'Image',
     uploadImage: 'Upload image',
-    featured: 'Featured',
-    save: 'Save',
     cancel: 'Cancel',
-    edit: 'Edit',
-    delete: 'Delete',
-    views: 'views',
-    downloads: 'downloads',
-    confirmDelete: 'Are you sure you want to delete this document?',
-    creating: 'Creating...',
-    updating: 'Updating...',
-    uploadingDocument: 'Uploading document...',
-    uploadingImage: 'Uploading image...',
-    errorTitle: 'Please enter a title in Ukrainian',
-    errorUploading: 'Error uploading file',
-    successCreated: 'Document created successfully',
-    successUpdated: 'Document updated successfully',
-    successDeleted: 'Document deleted successfully'
+    save: 'Save',
+    uploading: 'Uploading...',
+    errorTitle: 'Please enter a title',
+    errorCategory: 'Please select a category',
+    errorFile: 'Please upload a file',
+    errorCover: 'Please upload a cover image',
+    supportedFormats: 'Supported formats',
+    pdfFormats: 'PDF',
+    videoFormats: 'MP4, WebM, MOV',
+    audioFormats: 'MP3, WAV, OGG',
+    imageFormats: 'JPG, PNG, WebP, GIF',
+    maxSize: 'Max size'
   }
 };
 
-export default function AdminArchivePage() {
+type MediaType = 'pdf' | 'video' | 'audio' | 'image';
+
+export default function AdminArchiveUploadPage() {
   const { lang } = useLanguage();
   const t = translations[lang];
+  const router = useRouter();
 
-  const [documents, setDocuments] = useState<ArchiveDocument[]>([]);
-  const [categories, setCategories] = useState<ArchiveCategory[]>([]);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingDocument, setEditingDocument] = useState<ArchiveDocument | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-
-  // Form state
-  const [titleUk, setTitleUk] = useState('');
-  const [titleEn, setTitleEn] = useState('');
-  const [descriptionUk, setDescriptionUk] = useState('');
-  const [descriptionEn, setDescriptionEn] = useState('');
-  const [categoryId, setCategoryId] = useState<number | null>(null);
-  const [author, setAuthor] = useState('');
-  const [publicationDate, setPublicationDate] = useState('');
-  const [isFeatured, setIsFeatured] = useState(false);
-  const [documentFile, setDocumentFile] = useState<File | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [documentUrl, setDocumentUrl] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [uploadingDoc, setUploadingDoc] = useState(false);
-  const [uploadingImg, setUploadingImg] = useState(false);
+  const [mediaType, setMediaType] = useState<MediaType>('pdf');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState<any[]>([]);
+  
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string>('');
+  
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string>('');
+  
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    loadDocuments();
     loadCategories();
   }, []);
 
-  async function loadDocuments() {
-    const { data, error } = await supabase
-      .from('archive_documents')
-      .select(`
-        *,
-        category:archive_categories(*)
-      `)
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      setDocuments(data);
-    }
-  }
-
   async function loadCategories() {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('archive_categories')
       .select('*')
-      .order('display_order', { ascending: true });
+      .order('name_uk');
+    
+    if (data) setCategories(data);
+  }
 
-    if (!error && data) {
-      setCategories(data);
+  function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverImage(file);
+      setCoverPreview(URL.createObjectURL(file));
     }
   }
 
-  async function uploadDocument(file: File) {
-    setUploadingDoc(true);
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `documents/${fileName}`;
-
-    const { data, error } = await supabase.storage
-      .from('archive-documents')
-      .upload(filePath, file);
-
-    setUploadingDoc(false);
-
-    if (error) {
-      console.error('Upload error:', error);
-      return null;
+  function handleMediaChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      setMediaFile(file);
+      
+      // Create preview for images
+      if (mediaType === 'image') {
+        setMediaPreview(URL.createObjectURL(file));
+      }
     }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('archive-documents')
-      .getPublicUrl(filePath);
-
-    return { url: publicUrl, filename: file.name, type: fileExt, size: file.size };
-  }
-
-  async function uploadImage(file: File) {
-    setUploadingImg(true);
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `images/${fileName}`;
-
-    const { data, error } = await supabase.storage
-      .from('archive-images')
-      .upload(filePath, file);
-
-    setUploadingImg(false);
-
-    if (error) {
-      console.error('Upload error:', error);
-      return null;
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('archive-images')
-      .getPublicUrl(filePath);
-
-    return publicUrl;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setMessage('');
 
-    if (!titleUk.trim()) {
-      setMessage(t.errorTitle);
+    // Validate
+    if (!title.trim()) {
+      alert(t.errorTitle);
       return;
     }
 
-    setLoading(true);
+    if (!category) {
+      alert(t.errorCategory);
+      return;
+    }
+
+    if (!mediaFile) {
+      alert(t.errorFile);
+      return;
+    }
+
+    // For videos and audios, cover image is required
+    if ((mediaType === 'video' || mediaType === 'audio') && !coverImage) {
+      alert(t.errorCover);
+      return;
+    }
+
+    setUploading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      console.log('🚀 Starting upload...');
+      console.log('Media type:', mediaType);
+      console.log('File:', mediaFile.name);
+      let coverUrl = '';
+      let mediaUrl = '';
+      let thumbnailUrl = '';
 
-      let finalDocUrl = documentUrl;
-      let finalDocFilename = '';
-      let finalDocType = '';
-      let finalFileSize = 0;
+      // Upload cover image (for all types except when image is the main file)
+      if (coverImage && mediaType !== 'image') {
+        console.log('📸 Uploading cover image...');
+        const coverExt = coverImage.name.split('.').pop();
+        const coverPath = `${Date.now()}_cover.${coverExt}`;
+        
+        const { error: coverError } = await supabase.storage
+          .from('archive-images')
+          .upload(coverPath, coverImage);
 
-      // Upload document if new file selected
-      if (documentFile) {
-        const uploadResult = await uploadDocument(documentFile);
-        if (!uploadResult) {
-          setMessage(t.errorUploading);
-          setLoading(false);
-          return;
+        if (coverError) {
+          console.error('❌ Cover upload failed:', coverError);
+          throw coverError;
         }
-        finalDocUrl = uploadResult.url;
-        finalDocFilename = uploadResult.filename;
-        finalDocType = uploadResult.type || '';
-        finalFileSize = uploadResult.size;
+
+        const { data: coverData } = supabase.storage
+          .from('archive-images')
+          .getPublicUrl(coverPath);
+        
+        coverUrl = coverData.publicUrl;
+        thumbnailUrl = coverData.publicUrl;
+        console.log('✅ Cover uploaded:', coverUrl);
       }
 
-      let finalImageUrl = imageUrl;
-
-      // Upload image if new file selected
-      if (imageFile) {
-        const uploadedImageUrl = await uploadImage(imageFile);
-        if (!uploadedImageUrl) {
-          setMessage(t.errorUploading);
-          setLoading(false);
-          return;
-        }
-        finalImageUrl = uploadedImageUrl;
+      // Upload main media file
+      console.log('📤 Uploading main file...');
+      const fileExt = mediaFile.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      
+      let bucket = '';
+      switch (mediaType) {
+        case 'pdf':
+          bucket = 'archive-documents';
+          break;
+        case 'video':
+          bucket = 'archive-videos';
+          break;
+        case 'audio':
+          bucket = 'archive-audios';
+          break;
+        case 'image':
+          bucket = 'archive-images';
+          break;
       }
 
-      const documentData = {
-        category_id: categoryId,
-        title_uk: titleUk.trim(),
-        title_en: titleEn.trim() || titleUk.trim(),
-        description_uk: descriptionUk.trim() || null,
-        description_en: descriptionEn.trim() || null,
-        document_url: finalDocUrl || null,
-        document_filename: finalDocFilename || null,
-        document_type: finalDocType || null,
-        image_url: finalImageUrl || null,
-        author: author.trim() || null,
-        publication_date: publicationDate || null,
-        file_size: finalFileSize || null,
-        uploaded_by: user.id,
-        is_featured: isFeatured,
-      };
+      console.log('📦 Uploading to bucket:', bucket);
 
-      if (editingDocument) {
-        // Update existing document
-        const { error } = await supabase
-          .from('archive_documents')
-          .update(documentData)
-          .eq('id', editingDocument.id);
+      const { error: uploadError } = await supabase.storage
+        .from(bucket)
+        .upload(fileName, mediaFile);
 
-        if (error) throw error;
-        setMessage(t.successUpdated);
-      } else {
-        // Create new document
-        const { error } = await supabase
-          .from('archive_documents')
-          .insert([documentData]);
-
-        if (error) throw error;
-        setMessage(t.successCreated);
+      if (uploadError) {
+        console.error('❌ File upload failed:', uploadError);
+        throw uploadError;
       }
 
-      // Reset form
-      resetForm();
-      loadDocuments();
-      setIsFormOpen(false);
+      const { data: fileData } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(fileName);
+
+      mediaUrl = fileData.publicUrl;
+      console.log('✅ File uploaded:', mediaUrl);
+
+      // For images used as main content, use it as both media and cover
+      if (mediaType === 'image') {
+        coverUrl = mediaUrl;
+        thumbnailUrl = mediaUrl;
+      }
+
+      // Get file size
+      const fileSize = mediaFile.size;
+
+      // For videos/audios, you might want to get duration
+      // This requires additional processing - simplified here
+      let duration = null;
+      if (mediaType === 'video' || mediaType === 'audio') {
+        // You can add duration extraction here using a library
+        // For now, we'll leave it as null
+      }
+
+      console.log('💾 Saving to database...');
+
+      // Insert into database
+      const { error: dbError } = await supabase
+        .from('archive_documents')
+        .insert({
+          title_uk: title.trim(),
+          title_en: title.trim(), // You can add separate EN field
+          description_uk: description.trim(),
+          description_en: description.trim(), // You can add separate EN field
+          category_id: category,
+          cover_image_url: coverUrl,
+          pdf_url: mediaType === 'pdf' ? mediaUrl : null,
+          media_type: mediaType,
+          media_url: mediaType !== 'pdf' ? mediaUrl : null,
+          thumbnail_url: thumbnailUrl,
+          file_size: fileSize,
+          duration: duration
+        });
+
+      if (dbError) {
+        console.error('Database error:', dbError);
+        throw dbError;
+      }
+
+      // Success! Show message and redirect
+      alert('Успішно завантажено!');
+      
+      // Small delay to ensure alert is seen
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Redirect to archive admin page
+      window.location.href = '/admin/archive';
+
     } catch (error: any) {
-      console.error('Error:', error);
-      setMessage(error.message);
-    } finally {
-      setLoading(false);
+      console.error('Upload error:', error);
+      alert('Помилка: ' + error.message);
+      setUploading(false);
     }
   }
 
-  function resetForm() {
-    setTitleUk('');
-    setTitleEn('');
-    setDescriptionUk('');
-    setDescriptionEn('');
-    setCategoryId(null);
-    setAuthor('');
-    setPublicationDate('');
-    setIsFeatured(false);
-    setDocumentFile(null);
-    setImageFile(null);
-    setDocumentUrl('');
-    setImageUrl('');
-    setEditingDocument(null);
-  }
-
-  function handleEdit(doc: ArchiveDocument) {
-    setEditingDocument(doc);
-    setTitleUk(doc.title_uk);
-    setTitleEn(doc.title_en);
-    setDescriptionUk(doc.description_uk || '');
-    setDescriptionEn(doc.description_en || '');
-    setCategoryId(doc.category_id);
-    setAuthor(doc.author || '');
-    setPublicationDate(doc.publication_date || '');
-    setIsFeatured(doc.is_featured);
-    setDocumentUrl(doc.document_url || '');
-    setImageUrl(doc.image_url || '');
-    setIsFormOpen(true);
-  }
-
-  async function handleDelete(id: number) {
-    if (!confirm(t.confirmDelete)) return;
-
-    const { error } = await supabase
-      .from('archive_documents')
-      .delete()
-      .eq('id', id);
-
-    if (!error) {
-      setMessage(t.successDeleted);
-      loadDocuments();
-    }
+  if (uploading) {
+    return <LoadingSpinner message={t.uploading} />;
   }
 
   return (
     <div className="min-h-screen bg-black text-white pt-24 pb-20 px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">{t.title}</h1>
-          <button
-            onClick={() => {
-              resetForm();
-              setIsFormOpen(true);
-            }}
-            className="bg-green-500 hover:bg-green-400 text-black px-6 py-3 rounded-lg font-bold transition-colors"
-          >
-            {t.addDocument}
-          </button>
-        </div>
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold mb-8">{t.title}</h1>
 
-        {/* Message */}
-        {message && (
-          <div className="mb-6 bg-blue-900/20 border border-blue-800 rounded-lg p-4">
-            <p className="text-blue-400">{message}</p>
-          </div>
-        )}
-
-        {/* Form */}
-        {isFormOpen && (
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 mb-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                {/* Title UK */}
-                <div>
-                  <label className="block text-sm font-bold mb-2">{t.titleUk} *</label>
-                  <input
-                    type="text"
-                    value={titleUk}
-                    onChange={(e) => setTitleUk(e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-                    required
-                  />
-                </div>
-
-                {/* Title EN */}
-                <div>
-                  <label className="block text-sm font-bold mb-2">{t.titleEn}</label>
-                  <input
-                    type="text"
-                    value={titleEn}
-                    onChange={(e) => setTitleEn(e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-                  />
-                </div>
-              </div>
-
-              {/* Description UK */}
-              <div>
-                <label className="block text-sm font-bold mb-2">{t.descriptionUk}</label>
-                <textarea
-                  value={descriptionUk}
-                  onChange={(e) => setDescriptionUk(e.target.value)}
-                  rows={4}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-                />
-              </div>
-
-              {/* Description EN */}
-              <div>
-                <label className="block text-sm font-bold mb-2">{t.descriptionEn}</label>
-                <textarea
-                  value={descriptionEn}
-                  onChange={(e) => setDescriptionEn(e.target.value)}
-                  rows={4}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-6">
-                {/* Category */}
-                <div>
-                  <label className="block text-sm font-bold mb-2">{t.category}</label>
-                  <select
-                    value={categoryId || ''}
-                    onChange={(e) => setCategoryId(Number(e.target.value) || null)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-                  >
-                    <option value="">{t.selectCategory}</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {lang === 'uk' ? cat.name_uk : cat.name_en}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Author */}
-                <div>
-                  <label className="block text-sm font-bold mb-2">{t.author}</label>
-                  <input
-                    type="text"
-                    value={author}
-                    onChange={(e) => setAuthor(e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-                  />
-                </div>
-
-                {/* Publication Date */}
-                <div>
-                  <label className="block text-sm font-bold mb-2">{t.publicationDate}</label>
-                  <input
-                    type="date"
-                    value={publicationDate}
-                    onChange={(e) => setPublicationDate(e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-                  />
-                </div>
-              </div>
-
-              {/* Document Upload */}
-              <div>
-                <label className="block text-sm font-bold mb-2">{t.document}</label>
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx,.txt"
-                  onChange={(e) => setDocumentFile(e.target.files?.[0] || null)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-                />
-                {uploadingDoc && <p className="text-green-500 mt-2">{t.uploadingDocument}</p>}
-              </div>
-
-              {/* Image Upload */}
-              <div>
-                <label className="block text-sm font-bold mb-2">{t.image}</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500"
-                />
-                {uploadingImg && <p className="text-green-500 mt-2">{t.uploadingImage}</p>}
-                {imageUrl && (
-                  <img src={imageUrl} alt="Preview" className="mt-4 max-w-xs rounded-lg" />
-                )}
-              </div>
-
-              {/* Featured */}
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="featured"
-                  checked={isFeatured}
-                  onChange={(e) => setIsFeatured(e.target.checked)}
-                  className="w-5 h-5"
-                />
-                <label htmlFor="featured" className="text-sm font-bold">
-                  {t.featured}
-                </label>
-              </div>
-
-              {/* Buttons */}
-              <div className="flex gap-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Media Type Selection */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <label className="block text-sm font-semibold mb-3">{t.mediaType}</label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {(['pdf', 'video', 'audio', 'image'] as MediaType[]).map((type) => (
                 <button
-                  type="submit"
-                  disabled={loading || uploadingDoc || uploadingImg}
-                  className="bg-green-500 hover:bg-green-400 text-black px-6 py-3 rounded-lg font-bold transition-colors disabled:opacity-50"
-                >
-                  {loading ? (editingDocument ? t.updating : t.creating) : t.save}
-                </button>
-                <button
+                  key={type}
                   type="button"
-                  onClick={() => {
-                    resetForm();
-                    setIsFormOpen(false);
-                  }}
-                  className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-bold transition-colors"
+                  onClick={() => setMediaType(type)}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    mediaType === type
+                      ? 'border-green-500 bg-green-500/10'
+                      : 'border-gray-700 hover:border-gray-600'
+                  }`}
                 >
-                  {t.cancel}
+                  <div className="text-3xl mb-2">
+                    {type === 'pdf' && '📄'}
+                    {type === 'video' && '🎬'}
+                    {type === 'audio' && '🎵'}
+                    {type === 'image' && '🖼️'}
+                  </div>
+                  <div className="text-sm font-semibold">
+                    {t[type]}
+                  </div>
                 </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* Documents List */}
-        <div className="space-y-4">
-          {documents.map((doc) => (
-            <div key={doc.id} className="bg-gray-900 border border-gray-800 rounded-lg p-6 flex gap-6">
-              {/* Image */}
-              {doc.image_url && (
-                <img
-                  src={doc.image_url}
-                  alt={doc.title_uk}
-                  className="w-32 h-32 object-cover rounded-lg"
-                />
-              )}
-
-              {/* Info */}
-              <div className="flex-1">
-                <h3 className="text-xl font-bold mb-2">{lang === 'uk' ? doc.title_uk : doc.title_en}</h3>
-                {doc.description_uk && (
-                  <p className="text-gray-400 mb-3 line-clamp-2">
-                    {lang === 'uk' ? doc.description_uk : doc.description_en}
-                  </p>
-                )}
-                <div className="flex items-center gap-6 text-sm text-gray-500">
-                  {doc.author && <span>Автор: {doc.author}</span>}
-                  {doc.publication_date && <span>{new Date(doc.publication_date).toLocaleDateString()}</span>}
-                  <span>{doc.view_count} {t.views}</span>
-                  <span>{doc.download_count} {t.downloads}</span>
-                  {doc.is_featured && <span className="text-green-500">⭐ Featured</span>}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => handleEdit(doc)}
-                  className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors"
-                >
-                  {t.edit}
-                </button>
-                <button
-                  onClick={() => handleDelete(doc.id)}
-                  className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors"
-                >
-                  {t.delete}
-                </button>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-semibold mb-2">
+              {t.titleField}
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={t.titlePlaceholder}
+              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-semibold mb-2">
+              {t.descriptionField}
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={t.descriptionPlaceholder}
+              rows={4}
+              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors resize-none"
+            />
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-semibold mb-2">
+              {t.category}
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
+            >
+              <option value="">{t.selectCategory}</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {lang === 'uk' ? cat.name_uk : cat.name_en}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Cover Image (for video, audio, and PDF) */}
+          {mediaType !== 'image' && (
+            <div>
+              <label className="block text-sm font-semibold mb-2">
+                {t.coverImage}
+                {(mediaType === 'video' || mediaType === 'audio') && (
+                  <span className="text-red-500 ml-1">*</span>
+                )}
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleCoverChange}
+                className="hidden"
+                id="cover-upload"
+              />
+              <label
+                htmlFor="cover-upload"
+                className="block w-full border-2 border-dashed border-gray-700 rounded-lg p-8 text-center cursor-pointer hover:border-green-500 transition-colors"
+              >
+                {coverPreview ? (
+                  <img
+                    src={coverPreview}
+                    alt="Cover preview"
+                    className="max-h-48 mx-auto rounded"
+                  />
+                ) : (
+                  <>
+                    <div className="text-4xl mb-2">📷</div>
+                    <div className="text-gray-400">{t.uploadCover}</div>
+                    <div className="text-xs text-gray-500 mt-2">
+                      {t.supportedFormats}: {t.imageFormats}
+                    </div>
+                  </>
+                )}
+              </label>
+            </div>
+          )}
+
+          {/* Main Media File */}
+          <div>
+            <label className="block text-sm font-semibold mb-2">
+              {mediaType === 'pdf' && t.pdfFile}
+              {mediaType === 'video' && t.videoFile}
+              {mediaType === 'audio' && t.audioFile}
+              {mediaType === 'image' && t.imageFile}
+              <span className="text-red-500 ml-1">*</span>
+            </label>
+            <input
+              type="file"
+              accept={
+                mediaType === 'pdf' ? '.pdf' :
+                mediaType === 'video' ? 'video/*' :
+                mediaType === 'audio' ? 'audio/*' :
+                'image/*'
+              }
+              onChange={handleMediaChange}
+              className="hidden"
+              id="media-upload"
+            />
+            <label
+              htmlFor="media-upload"
+              className="block w-full border-2 border-dashed border-gray-700 rounded-lg p-8 text-center cursor-pointer hover:border-green-500 transition-colors"
+            >
+              {mediaFile ? (
+                <div>
+                  {mediaType === 'image' && mediaPreview ? (
+                    <img
+                      src={mediaPreview}
+                      alt="Preview"
+                      className="max-h-64 mx-auto rounded mb-4"
+                    />
+                  ) : (
+                    <div className="text-4xl mb-2">
+                      {mediaType === 'pdf' && '📄'}
+                      {mediaType === 'video' && '🎬'}
+                      {mediaType === 'audio' && '🎵'}
+                      {mediaType === 'image' && '🖼️'}
+                    </div>
+                  )}
+                  <div className="text-green-500 font-semibold">
+                    {mediaFile.name}
+                  </div>
+                  <div className="text-sm text-gray-400 mt-1">
+                    {(mediaFile.size / 1024 / 1024).toFixed(2)} MB
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="text-4xl mb-2">
+                    {mediaType === 'pdf' && '📄'}
+                    {mediaType === 'video' && '🎬'}
+                    {mediaType === 'audio' && '🎵'}
+                    {mediaType === 'image' && '🖼️'}
+                  </div>
+                  <div className="text-gray-400">
+                    {mediaType === 'pdf' && t.uploadPdf}
+                    {mediaType === 'video' && t.uploadVideo}
+                    {mediaType === 'audio' && t.uploadAudio}
+                    {mediaType === 'image' && t.uploadImage}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {t.supportedFormats}: {
+                      mediaType === 'pdf' ? t.pdfFormats :
+                      mediaType === 'video' ? t.videoFormats :
+                      mediaType === 'audio' ? t.audioFormats :
+                      t.imageFormats
+                    }
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {t.maxSize}: {
+                      mediaType === 'pdf' ? '50 MB' :
+                      mediaType === 'video' ? '500 MB' :
+                      mediaType === 'audio' ? '100 MB' :
+                      '10 MB'
+                    }
+                  </div>
+                </>
+              )}
+            </label>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-4 pt-4">
+            <button
+              type="button"
+              onClick={() => router.push('/admin/archive')}
+              className="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-6 py-4 rounded-lg font-bold transition-colors"
+            >
+              {t.cancel}
+            </button>
+            <button
+              type="submit"
+              className="flex-1 bg-green-500 hover:bg-green-400 text-black px-6 py-4 rounded-lg font-bold transition-colors"
+            >
+              {t.save}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
