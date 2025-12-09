@@ -21,3 +21,31 @@ html {
 body {
   overflow-x: hidden;
 }
+
+@keyframes wave {
+  0% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(-2%) translateY(1%); }
+  100% { transform: translateX(0) translateY(0); }
+}
+
+.flag-wave {
+  animation: wave 3s ease-in-out infinite;
+}
+@keyframes ripple {
+  0% { transform: skewY(0deg); }
+  50% { transform: skewY(2deg); }
+  100% { transform: skewY(0deg); }
+}
+
+.flag-ripple {
+  animation: ripple 4s ease-in-out infinite;
+}
+@keyframes pulseGlow {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.85; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.wheel-pulse {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
