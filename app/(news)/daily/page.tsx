@@ -75,7 +75,7 @@ const fetchDailyTopic = async () => {
       .limit(3);
     
     if (related) {
-      setRelatedTopics(related);
+      setRelatedTopics(related as any);
     }
   }
   setLoading(false);
