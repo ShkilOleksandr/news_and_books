@@ -52,8 +52,11 @@ export default function LoginPage() {
     if (signInError) {
       setError(signInError.message);
       setLoading(false);
-    } else {
-      router.push('/forum');
+    } else if (data.user.email == 'romanewsukraine@gmail.com') {
+      router.push('/admin/dashboard');
+    }
+    else {
+      router.push('/');
     }
   }
 
