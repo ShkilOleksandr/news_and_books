@@ -5,6 +5,7 @@ import { supabase } from '@/app/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/app/context/LanguageContext';
 import Link from 'next/link';
+import LogoTiles from '@/app/components/LogoTiles';
 
 const translations = {
   uk: {
@@ -120,10 +121,7 @@ export default function SignUpPage() {
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="flex items-center justify-center gap-1 mb-8">
-          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl text-black">K</div>
-          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl text-black">Y</div>
-          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl text-black">R</div>
-          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl text-black">S</div>
+          <LogoTiles size="w-12 h-12" textSize="text-2xl" />
         </div>
 
         <div className="bg-gray-900 p-8 rounded-2xl">
