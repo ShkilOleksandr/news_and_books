@@ -2,6 +2,7 @@
 import { arch } from 'os';
 import { useLanguage } from '../context/LanguageContext';
 import ForumAuthButtons from './forum/Forumauthbuttons';
+import LogoTiles from './LogoTiles';
 
 const translations = {
   uk: {
@@ -38,10 +39,7 @@ export default function Header() {
         <div className="flex items-center justify-between gap-12">
           {/* Logo */}
           <a href="/" className="flex items-center gap-1 hover:opacity-80 transition-opacity flex-shrink-0">
-            <div className="w-10 h-10 bg-green-500 flex items-center justify-center font-bold text-xl text-black">K</div>
-            <div className="w-10 h-10 bg-green-500 flex items-center justify-center font-bold text-xl text-black">Y</div>
-            <div className="w-10 h-10 bg-green-500 flex items-center justify-center font-bold text-xl text-black">R</div>
-            <div className="w-10 h-10 bg-green-500 flex items-center justify-center font-bold text-xl text-black">S</div>
+            <LogoTiles size="w-10 h-10" textSize="text-xl" />
           </a>
 
           {/* Navigation Links */}

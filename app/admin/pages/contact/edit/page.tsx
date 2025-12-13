@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/app/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/app/context/LanguageContext';
+import LogoTiles from '@/app/components/LogoTiles';
 
 const translations = {
   uk: {
@@ -168,10 +169,7 @@ export default function EditContactPage() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">K</div>
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">Y</div>
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">R</div>
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">S</div>
+              <LogoTiles />
             </div>
             <span className="text-gray-400">{t.editContact}</span>
           </div>
@@ -255,7 +253,7 @@ export default function EditContactPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="contact@kyrs.com"
+                  placeholder="contact@roma.com"
                   className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
                 />
               </div>
@@ -301,7 +299,7 @@ export default function EditContactPage() {
                   name="facebook"
                   value={formData.facebook}
                   onChange={handleChange}
-                  placeholder="https://facebook.com/kyrs"
+                  placeholder="https://facebook.com/roma"
                   className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
                 />
               </div>
@@ -313,7 +311,7 @@ export default function EditContactPage() {
                   name="twitter"
                   value={formData.twitter}
                   onChange={handleChange}
-                  placeholder="https://twitter.com/kyrs"
+                  placeholder="https://twitter.com/roma"
                   className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
                 />
               </div>
@@ -325,7 +323,7 @@ export default function EditContactPage() {
                   name="instagram"
                   value={formData.instagram}
                   onChange={handleChange}
-                  placeholder="https://instagram.com/kyrs"
+                  placeholder="https://instagram.com/roma"
                   className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
                 />
               </div>
@@ -337,7 +335,7 @@ export default function EditContactPage() {
                   name="linkedin"
                   value={formData.linkedin}
                   onChange={handleChange}
-                  placeholder="https://linkedin.com/company/kyrs"
+                  placeholder="https://linkedin.com/company/roma"
                   className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
                 />
               </div>

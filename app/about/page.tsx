@@ -6,7 +6,7 @@ const translations = {
   uk: {
     about: 'Про нас',
     mission: 'Наша місія',
-    missionText: 'KYRS - це платформа, створена для того, щоб тримати вас у курсі найважливіших подій. Ми віримо в силу інформації та її здатність змінювати світ на краще.',
+  missionText: 'РОМА - це платформа, створена для того, щоб тримати вас у курсі найважливіших подій. Ми віримо в силу інформації та її здатність змінювати світ на краще.',
     values: 'Наші цінності',
     valuesTitle1: 'Незалежність',
     valuesText1: 'Ми надаємо об\'єктивну інформацію без політичного чи комерційного впливу.',
@@ -23,7 +23,7 @@ const translations = {
   en: {
     about: 'About Us',
     mission: 'Our Mission',
-    missionText: 'KYRS is a platform created to keep you informed about the most important events. We believe in the power of information and its ability to change the world for the better.',
+  missionText: 'ROMA is a platform created to keep you informed about the most important events. We believe in the power of information and its ability to change the world for the better.',
     values: 'Our Values',
     valuesTitle1: 'Independence',
     valuesText1: 'We provide objective information without political or commercial influence.',

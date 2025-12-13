@@ -1,7 +1,8 @@
-'use client'
+ 'use client'
 import { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../lib/supabase';
+import LogoTiles from './LogoTiles';
 
 const translations = {
   uk: {
@@ -139,12 +140,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           {/* Logo and Description */}
           <div className="col-span-1">
-            <div className="flex items-center gap-1 mb-4">
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold text-black">K</div>
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold text-black">Y</div>
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold text-black">R</div>
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold text-black">S</div>
-            </div>
+            <LogoTiles />
             <p className="text-gray-400 text-sm">
               {lang === 'uk' 
                 ? 'Твоя історія починається тут — з кроку до мрій, ідей і змін.'
@@ -279,7 +275,7 @@ export default function Footer() {
 
           {/* Copyright */}
           <div className="text-gray-400 text-sm">
-            © {new Date().getFullYear()} KYRS. {t.copyright}
+            © {new Date().getFullYear()} {lang === 'uk' ? 'РОМА.' : 'ROMA.'} {t.copyright}
           </div>
         </div>
       </div>

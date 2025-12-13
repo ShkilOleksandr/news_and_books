@@ -5,7 +5,7 @@ import Footer from './components/Footer';
 import { LanguageProvider } from './context/LanguageContext';
 
 export const metadata: Metadata = {
-  title: "KYRS News",
+  title: "ROMA / РОМА News",
   description: "Ukrainian News Platform",
 };
 

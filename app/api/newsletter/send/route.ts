@@ -30,7 +30,7 @@ async function sendEmailWithRetry(
   while (attempt < RETRY_LIMIT) {
     try {
       const response = await resend.emails.send({
-        from: 'KYRS Newsletter <newsletter@romaofukraine.com>',
+        from: 'ROMA / РОМА Newsletter <newsletter@romaofukraine.com>',
         to: subscriber.email,
         subject,
         html:

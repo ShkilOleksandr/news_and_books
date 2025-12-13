@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import ForumAuthButtons from './forum/Forumauthbuttons';
+import LogoTiles from './LogoTiles';
 
 const translations = {
   uk: {
@@ -40,10 +41,7 @@ export default function MobileHeader() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <a href="/" className="flex items-center gap-1 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold text-lg text-black">K</div>
-            <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold text-lg text-black">Y</div>
-            <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold text-lg text-black">R</div>
-            <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold text-lg text-black">S</div>
+            <LogoTiles size="w-8 h-8" textSize="text-lg" />
           </a>
 
           {/* Hamburger Button */}

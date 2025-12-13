@@ -4,6 +4,7 @@ import { supabase } from '@/app/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/app/context/LanguageContext';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
+import LogoTiles from '@/app/components/LogoTiles';
 
 const translations = {
   uk: {
@@ -86,10 +87,7 @@ export default function AdminDailyTopicsPage() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">K</div>
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">Y</div>
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">R</div>
-              <div className="w-8 h-8 bg-green-500 flex items-center justify-center font-bold">S</div>
+              <LogoTiles />
             </div>
             <span className="text-gray-400">{t.dailyTopics}</span>
           </div>
