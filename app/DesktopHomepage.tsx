@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from './context/LanguageContext';
 import { supabase } from './lib/supabase';
 import LoadingSpinner from './components/LoadingSpinner';
-import Flag from '@/app/components/Flag';
 
 type HomeContent = {
   heroTitle: string;
@@ -29,6 +28,17 @@ export default function DesktopHomepage() {
   const [loading, setLoading] = useState(true);
   const [homeContent, setHomeContent] = useState<HomeContent | null>(null);
   const [featuredNews, setFeaturedNews] = useState<NewsItem[]>([]);
+
+  const translations = {
+    uk: {
+      romaCouncil: 'Рада Ромів України'
+    },
+    en: {
+      romaCouncil: 'Roma Council of Ukraine'
+    }
+  };
+
+  const t = translations[lang];
 
   useEffect(() => {
     fetchHomeData();
@@ -62,66 +72,37 @@ export default function DesktopHomepage() {
       <main className="flex-1 pt-20">
         
         {/* HERO SECTION */}
-        <section className="relative min-h-screen flex items-center">
+        <section className="relative min-h-screen flex items-center justify-center py-20">
 
-          {/* Right Grid */}
-          <div className="absolute right-0 top-0 bottom-0 w-1/2 grid grid-cols-2 gap-4 p-8">
+          {/* Center Grid - Only Flags */}
+          <div className="w-full max-w-4xl grid grid-cols-2 gap-6 p-8">
+
+            {/* Roma Council of Ukraine Section */}
+            <div className="col-span-2 flex flex-col items-center justify-center">
+              <h2 className="text-4xl font-bold text-white mb-6 text-center">
+                {t.romaCouncil}
+              </h2>
+              <img 
+                src="/flags/main_flag.png"
+                alt={t.romaCouncil}
+                className="w-full max-w-2xl object-contain"
+              />
+            </div>
 
             {/* 🇺🇦 Ukrainian Flag */}
-            <Flag 
+            <img 
               src="/flags/ukrainian.png"
               alt="Ukrainian Flag"
-              className="rounded-lg shadow-2xl aspect-[3/2]"
+              className="w-full aspect-[3/2] object-cover"
             />
 
             {/* 🟦🟩🔴 Romani Flag */}
-            <Flag 
+            <img 
               src="/flags/romani.png"
               alt="Romani Flag"
-              className="rounded-lg shadow-2xl aspect-[3/2]"
+              className="w-full aspect-[3/2] object-cover"
             />
 
-            {/* Featured Hero Image */}
-            <div className="bg-gray-800 rounded-lg overflow-hidden col-span-2 relative">
-              <img
-                src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=600&h=300"
-                className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-transparent flex items-center justify-center">
-                <div className="text-6xl font-bold text-center">
-                  {homeContent?.voiceMatters?.split(' ').map((word, i) => (
-                    <div key={i}>
-                      <span className={i === 0 ? 'text-green-500' : ''}>{word}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gray-800 rounded-lg overflow-hidden col-span-2">
-              <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=300"
-                className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
-              />
-            </div>
-
-          </div>
-
-          {/* Left Side Text */}
-          <div className="relative z-10 max-w-3xl px-12 py-20">
-            <h1 className="text-8xl font-bold mb-8 leading-tight"
-              style={{ WebkitTextStroke: '2px white', WebkitTextFillColor: 'transparent' }}>
-              {homeContent?.heroTitle}
-            </h1>
-            <p className="text-xl mb-12 text-gray-300 max-w-xl">
-              {homeContent?.heroSubtitle}
-            </p>
-            <a 
-              href="/news"
-              className="inline-block bg-green-500 text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-400 transition-all transform hover:scale-105"
-            >
-              {homeContent?.readMore}
-            </a>
           </div>
 
         </section>

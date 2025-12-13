@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from './context/LanguageContext';
 import { supabase } from './lib/supabase';
 import LoadingSpinner from './components/LoadingSpinner';
-import Flag from '@/app/components/Flag';
 
 type HomeContent = {
   heroTitle: string;
@@ -29,6 +28,17 @@ export default function MobileHomepage() {
   const [loading, setLoading] = useState(true);
   const [homeContent, setHomeContent] = useState<HomeContent | null>(null);
   const [featuredNews, setFeaturedNews] = useState<NewsItem[]>([]);
+
+  const translations = {
+    uk: {
+      romaCouncil: 'Рада Ромів України'
+    },
+    en: {
+      romaCouncil: 'Roma Council of Ukraine'
+    }
+  };
+
+  const t = translations[lang];
 
   useEffect(() => {
     fetchHomeData();
@@ -61,78 +71,35 @@ export default function MobileHomepage() {
     <div className="lg:hidden min-h-screen bg-black text-white">
       <main className="pt-20 px-4">
 
-        {/* HERO */}
+        {/* ROMA COUNCIL SECTION */}
         <section className="py-12">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-6 leading-tight">
-            {homeContent?.heroTitle}
-          </h1>
-          <p className="text-base sm:text-lg mb-8 text-gray-300">
-            {homeContent?.heroSubtitle}
-          </p>
-          <a 
-            href="/news"
-            className="inline-block bg-green-500 text-black px-6 py-3 rounded-lg font-bold text-base hover:bg-green-400 transition-colors w-full sm:w-auto text-center"
-          >
-            {homeContent?.readMore}
-          </a>
+          <div className="flex flex-col items-center">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6 text-center">
+              {t.romaCouncil}
+            </h2>
+            <img 
+              src="/flags/main_flag.png"
+              alt={t.romaCouncil}
+              className="w-full object-contain"
+            />
+          </div>
         </section>
 
         {/* FLAGS */}
         <section className="py-8 grid grid-cols-2 gap-4">
 
-          <Flag 
+          <img 
             src="/flags/ukrainian.png"
             alt="Ukrainian Flag"
-            className="aspect-[3/2] rounded-lg shadow-lg"
+            className="w-full aspect-[3/2] object-cover"
           />
 
-          <Flag 
+          <img 
             src="/flags/romani.png"
             alt="Romani Flag"
-            className="aspect-[3/2] rounded-lg shadow-lg"
+            className="w-full aspect-[3/2] object-cover"
           />
 
-        </section>
-
-        {/* VOICE MATTERS */}
-        <section className="py-8">
-          <div className="bg-gradient-to-r from-green-500/20 to-transparent rounded-lg p-8 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold">
-              {homeContent?.voiceMatters?.split(' ').map((word, i) => (
-                <span key={i} className={i === 0 ? 'text-green-500' : ''}>
-                  {word}{' '}
-                </span>
-              ))}
-            </h2>
-          </div>
-        </section>
-
-        {/* GRID IMAGES */}
-        <section className="py-8 grid grid-cols-2 gap-4">
-          <div className="aspect-square rounded-lg overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=400"
-              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
-            />
-          </div>
-
-          <div className="aspect-square bg-green-500 rounded-lg flex items-center justify-center">
-            <div className="w-20 h-20 bg-black rounded-full"></div>
-          </div>
-
-          <div className="col-span-2 aspect-video rounded-lg overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=600&h=300"
-              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
-            />
-          </div>
-
-          <div className="col-span-2 aspect-video rounded-lg overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=300"
-              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
-            />
-          </div>
         </section>
 
         {/* NEWS */}
