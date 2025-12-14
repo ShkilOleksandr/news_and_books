@@ -41,7 +41,7 @@ export default function MobileHeader() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <a href="/" className="flex items-center gap-1 hover:opacity-80 transition-opacity">
-            <LogoTiles size="w-8 h-8" textSize="text-lg" />
+            <LogoTiles size="w-8 h-8" textSize="text-lg" letters={['K','E','T','A','N','E']} />
           </a>
 
           {/* Hamburger Button */}

@@ -39,7 +39,7 @@ export default function Header() {
         <div className="flex items-center justify-between gap-12">
           {/* Logo */}
           <a href="/" className="flex items-center gap-1 hover:opacity-80 transition-opacity flex-shrink-0">
-            <LogoTiles size="w-10 h-10" textSize="text-xl" />
+            <LogoTiles size="w-10 h-10" textSize="text-xl" letters={['K','E','T','A','N','E']} />
           </a>
 
           {/* Navigation Links */}
