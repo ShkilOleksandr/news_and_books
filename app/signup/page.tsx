@@ -117,7 +117,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center px-6 py-20">
+    <div className="min-h-screen bg-black text-white flex items-center justify-center px-6 pt-24 pb-20">
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="flex items-center justify-center gap-1 mb-8">
