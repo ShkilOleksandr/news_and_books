@@ -55,10 +55,14 @@ export default function AdminLoginPage() {
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="flex items-center justify-center gap-1 mb-8">
-          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl">K</div>
-          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl">Y</div>
-          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl">R</div>
-          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl">S</div>
+          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl">r</div>
+          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl">o</div>
+          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl">m</div>
+          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl">a</div>
+          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl">р</div>
+          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl">о</div>
+          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl">м</div>
+          <div className="w-12 h-12 bg-green-500 flex items-center justify-center font-bold text-2xl">а</div>
         </div>
 
         <div className="bg-gray-900 p-8 rounded-2xl">
