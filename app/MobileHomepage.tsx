@@ -68,7 +68,7 @@ export default function MobileHomepage() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="lg:hidden min-h-screen bg-black text-white">
+    <div className="lg:hidden min-h-screen text-white">
       <main className="pt-20 px-4">
 
         {/* ROMA COUNCIL SECTION */}

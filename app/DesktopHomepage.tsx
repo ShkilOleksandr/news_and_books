@@ -68,7 +68,7 @@ export default function DesktopHomepage() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="hidden lg:block min-h-screen bg-black text-white">
+    <div className="hidden lg:block min-h-screen text-white">
       <main className="flex-1 pt-20">
         
         {/* HERO SECTION */}
