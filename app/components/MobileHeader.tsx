@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react';
-import { useLanguage } from '../context/LanguageContext';
-import ForumAuthButtons from './forum/Forumauthbuttons';
-import LogoTiles from './LogoTiles';
+import { useLanguage } from '@/app/context/LanguageContext';
+import ForumAuthButtons from '@/app/components/forum/Forumauthbuttons';
+import LogoTiles from '@/app/components/LogoTiles';
+import { useIsAdmin } from '@/app/lib/useisadmin';
 
 const translations = {
   uk: {
@@ -15,7 +16,8 @@ const translations = {
     forum: 'Форум',
     archive: 'Архів',
     talents: 'Таланти',
-    chat: 'Чат'
+    chat: 'Чат',
+    adminDashboard: 'Панель адміністратора'
   },
   en: {
     home: 'Home',
@@ -26,7 +28,8 @@ const translations = {
     forum: 'Forum',
     archive: 'Archive',
     talents: 'Talents',
-    chat: 'Chat'
+    chat: 'Chat',
+    adminDashboard: 'Admin Dashboard'
   }
 };
 
@@ -34,6 +37,7 @@ export default function MobileHeader() {
   const { lang, setLang } = useLanguage();
   const t = translations[lang];
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAdmin } = useIsAdmin();
 
   return (
     <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
@@ -131,6 +135,18 @@ export default function MobileHeader() {
             >
               {t.contact}
             </a>
+
+            {/* Admin Dashboard - Only visible to admins */}
+            {isAdmin && (
+              <a
+                href="/admin/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-3 hover:bg-gray-800 transition-colors bg-green-500/10 border-l-4 border-green-500 font-semibold rounded-lg flex items-center gap-2"
+              >
+                <span>⚙️</span>
+                <span>{t.adminDashboard}</span>
+              </a>
+            )}
 
             {/* Auth Buttons */}
             <div className="pt-2 border-t border-gray-800 px-4">
