@@ -154,7 +154,7 @@ export default function ArchivePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-20 px-8">
+    <div className="min-h-screen text-white pt-24 pb-20 px-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">{t.title}</h1>
 

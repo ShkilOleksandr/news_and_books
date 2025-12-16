@@ -26,15 +26,37 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body 
-        className="text-white relative"
-        suppressHydrationWarning
-        style={{
-          opacity: 0.7,
-          backgroundColor: 'transparent',
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.5), rgba(0,0,0,0.8))'
-        }}
-      >
+       <body className="text-white relative" suppressHydrationWarning>
+        
+        {/* Sky Background - Fixed behind everything */}
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: 'url(/sky2.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            zIndex: -2
+          }}
+        />
+        
+        {/* Dark overlay - Controls darkness */}
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.2), rgba(0,0,0,0.5))',
+            zIndex: -1
+          }}
+        />
+
         {/* Content */}
         <LanguageProvider>
           <Header />

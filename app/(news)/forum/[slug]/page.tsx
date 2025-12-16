@@ -78,7 +78,7 @@ export default function CategoryPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-20">
+      <div className="min-h-screen text-white pt-24 pb-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center">
             <p className="text-gray-400 text-2xl">{t.loading}</p>
@@ -90,7 +90,7 @@ export default function CategoryPage() {
 
   if (!category) {
     return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-20">
+      <div className="min-h-screen text-white pt-24 pb-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center">
             <p className="text-gray-400 text-2xl">Category not found</p>
@@ -101,7 +101,7 @@ export default function CategoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-20">
+    <div className="min-h-screen text-white pt-24 pb-20">
       <main>
         <div className="max-w-7xl mx-auto px-6">
           {/* Header */}

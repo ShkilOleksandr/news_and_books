@@ -83,7 +83,7 @@ const fetchDailyTopic = async () => {
 
   if (!topic) {
     return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-20">
+      <div className="min-h-screen text-white pt-24 pb-20">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h1 className="text-4xl font-bold mb-4">{t.noTopic}</h1>
           <a href="/" className="text-green-500 hover:text-green-400">
@@ -98,7 +98,7 @@ const fetchDailyTopic = async () => {
   const content = lang === 'uk' ? topic.content_uk : topic.content_en;
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-20">
+    <div className="min-h-screen text-white pt-24 pb-20">
       <div className="max-w-4xl mx-auto px-6">
         {/* Back Button */}
         <a href="/" className="inline-flex items-center text-green-500 hover:text-green-400 mb-8 transition-colors">

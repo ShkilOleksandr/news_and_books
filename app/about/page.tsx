@@ -44,7 +44,7 @@ export default function AboutPage() {
   const t = translations[lang];
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-20">
+    <div className="min-h-screen text-white pt-24 pb-20">
       <div className="max-w-6xl mx-auto px-6">
         {/* Page Title */}
         <h1 className="text-7xl font-bold mb-20 text-center">{t.about}</h1>

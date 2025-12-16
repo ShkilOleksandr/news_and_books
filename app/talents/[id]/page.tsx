@@ -111,7 +111,7 @@ export default function TalentProfilePage() {
 
   if (!talent) {
     return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-20">
+      <div className="min-h-screen text-white pt-24 pb-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center text-gray-400 text-2xl py-20">
             {t.notFound}
@@ -127,7 +127,7 @@ export default function TalentProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-20">
+    <div className="min-h-screen text-white pt-24 pb-20">
       <main>
         <div className="max-w-7xl mx-auto px-6">
           {/* Back Link */}

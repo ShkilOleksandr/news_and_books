@@ -245,7 +245,7 @@ export default function ChatPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-20 px-8">
+      <div className="min-h-screen text-white pt-24 pb-20 px-8">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl font-bold mb-8">{t.title}</h1>
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-12">
@@ -264,7 +264,7 @@ export default function ChatPage() {
 
   if (isBanned) {
     return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-20 px-8">
+      <div className="min-h-screen text-white pt-24 pb-20 px-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold mb-8">{t.title}</h1>
           <BannedMessage reason={reason} bannedAt={bannedAt} />
@@ -274,7 +274,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-20 px-8">
+    <div className="min-h-screen text-white pt-24 pb-20 px-8">
       <div className="max-w-4xl mx-auto h-[calc(100vh-200px)] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">

@@ -86,7 +86,7 @@ export default function NewsArticlePage({ params }: { params: Promise<{ id: stri
 
   if (notFound || !article) {
     return (
-      <div className="min-h-screen bg-black text-white pt-24 pb-20">
+      <div className="min-h-screen text-white pt-24 pb-20">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h1 className="text-4xl font-bold mb-4">
             {lang === 'uk' ? 'Статтю не знайдено' : 'Article not found'}
@@ -107,7 +107,7 @@ export default function NewsArticlePage({ params }: { params: Promise<{ id: stri
   const authorImage = article.author_image || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=faces';
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-20">
+    <div className="min-h-screen text-white pt-24 pb-20">
       <article className="max-w-4xl mx-auto px-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-gray-400 text-sm mb-8">
