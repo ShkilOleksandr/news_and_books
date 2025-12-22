@@ -45,14 +45,12 @@ export default function MobileHomepage() {
     uk: {
       romaCouncil: 'Рада Ромів України',
       aboutOrganization: 'Про організацію',
-      ourLeader: 'Наш лідер',
-      gallery: 'Галерея'
+      ourLeader: 'Наш лідер'
     },
     en: {
       romaCouncil: 'Roma Council of Ukraine',
       aboutOrganization: 'About Organization',
-      ourLeader: 'Our Leader',
-      gallery: 'Gallery'
+      ourLeader: 'Our Leader'
     }
   };
 
@@ -118,13 +116,29 @@ export default function MobileHomepage() {
           />
         </section>
 
-        {/* ABOUT ORGANIZATION */}
-        <section className="py-12">
-          <h2 className="text-3xl font-bold mb-6 text-center">{t.aboutOrganization}</h2>
-          <div className="text-base leading-relaxed text-gray-300">
-            {homeContent?.orgDescription}
-          </div>
-        </section>
+        {/* GALLERY SECTION - No title, plain display */}
+        {homeContent?.galleryImages && homeContent.galleryImages.length > 0 && (
+          <section className="py-12">
+            <div className="grid grid-cols-2 gap-3">
+              {homeContent.galleryImages
+                .sort((a, b) => a.order - b.order)
+                .map((image, index) => (
+                  <div key={index} className="relative overflow-hidden">
+                    <img 
+                      src={image.url}
+                      alt={image.caption || `Image ${index + 1}`}
+                      className="w-full aspect-square object-cover"
+                    />
+                    {image.caption && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
+                        <p className="text-white text-xs">{image.caption}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+            </div>
+          </section>
+        )}
 
         {/* LEADER SECTION */}
         {homeContent?.leaderName && (
@@ -138,14 +152,13 @@ export default function MobileHomepage() {
                   alt={homeContent.leaderName}
                   className="w-full aspect-square object-cover rounded-2xl shadow-2xl"
                 />
-                <div className="absolute inset-0 rounded-2xl ring-4 ring-green-500/20"></div>
               </div>
 
               {/* Leader Info */}
               <div className="text-center">
                 <h3 className="text-2xl font-bold mb-2">{homeContent.leaderName}</h3>
                 <p className="text-lg text-green-500 mb-4">{homeContent.leaderTitle}</p>
-                <div className="text-base leading-relaxed text-gray-300">
+                <div className="text-base leading-relaxed text-gray-300 whitespace-pre-line">
                   {homeContent.leaderBio}
                 </div>
               </div>
@@ -153,30 +166,13 @@ export default function MobileHomepage() {
           </section>
         )}
 
-        {/* GALLERY SECTION */}
-        {homeContent?.galleryImages && homeContent.galleryImages.length > 0 && (
-          <section className="py-12">
-            <h2 className="text-3xl font-bold mb-8 text-center">{t.gallery}</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {homeContent.galleryImages
-                .sort((a, b) => a.order - b.order)
-                .map((image, index) => (
-                  <div key={index} className="relative overflow-hidden rounded-lg shadow-lg">
-                    <img 
-                      src={image.url}
-                      alt={image.caption}
-                      className="w-full aspect-square object-cover"
-                    />
-                    {image.caption && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-2">
-                        <p className="text-white text-sm font-medium">{image.caption}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-            </div>
-          </section>
-        )}
+        {/* ABOUT ORGANIZATION */}
+        <section className="py-12">
+          <h2 className="text-3xl font-bold mb-6 text-center">{t.aboutOrganization}</h2>
+          <div className="text-base leading-relaxed text-gray-300 whitespace-pre-line">
+            {homeContent?.orgDescription}
+          </div>
+        </section>
 
         {/* NEWS */}
         <section className="py-12">
