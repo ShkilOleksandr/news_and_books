@@ -4,44 +4,65 @@ import { supabase } from '@/app/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/app/context/LanguageContext';
 import LogoTiles from '@/app/components/LogoTiles';
+import ImageUpload from '@/app/components/ImageUpload';
 
 const translations = {
   uk: {
     editHome: 'Редагувати головну сторінку',
     backToPages: 'Назад до сторінок',
-    heroTitleUk: 'Заголовок героя (Українська)',
-    heroTitleEn: 'Заголовок героя (English)',
-    heroSubtitleUk: 'Підзаголовок (Українська)',
-    heroSubtitleEn: 'Підзаголовок (English)',
-    readMoreUk: 'Текст кнопки (Українська)',
-    readMoreEn: 'Текст кнопки (English)',
-    voiceMattersUk: 'Текст "Voice Matters" (Українська)',
-    voiceMattersEn: 'Текст "Voice Matters" (English)',
     newsTitleUk: 'Заголовок секції новин (Українська)',
     newsTitleEn: 'Заголовок секції новин (English)',
+    
+    orgDescUk: 'Опис організації (Українська)',
+    orgDescEn: 'Опис організації (English)',
+    leaderNameUk: 'Ім\'я лідера (Українська)',
+    leaderNameEn: 'Ім\'я лідера (English)',
+    leaderTitleUk: 'Посада лідера (Українська)',
+    leaderTitleEn: 'Посада лідера (English)',
+    leaderBioUk: 'Біографія лідера (Українська)',
+    leaderBioEn: 'Біографія лідера (English)',
+    leaderPhoto: 'Фото лідера',
+    gallery: 'Галерея зображень',
+    addImage: 'Додати зображення',
+    uploadImage: 'Завантажити зображення',
+    imageCaption: 'Підпис',
+    removeImage: 'Видалити',
+    
     save: 'Зберегти',
     saving: 'Збереження...',
     loading: 'Завантаження...',
-    helper: 'Примітка: Новини на головній сторінці показують останні 3 статті автоматично.'
   },
   en: {
     editHome: 'Edit Homepage',
     backToPages: 'Back to Pages',
-    heroTitleUk: 'Hero Title (Ukrainian)',
-    heroTitleEn: 'Hero Title (English)',
-    heroSubtitleUk: 'Hero Subtitle (Ukrainian)',
-    heroSubtitleEn: 'Hero Subtitle (English)',
-    readMoreUk: 'Button Text (Ukrainian)',
-    readMoreEn: 'Button Text (English)',
-    voiceMattersUk: 'Voice Matters Text (Ukrainian)',
-    voiceMattersEn: 'Voice Matters Text (English)',
     newsTitleUk: 'News Section Title (Ukrainian)',
     newsTitleEn: 'News Section Title (English)',
+    
+    orgDescUk: 'Organization Description (Ukrainian)',
+    orgDescEn: 'Organization Description (English)',
+    leaderNameUk: 'Leader Name (Ukrainian)',
+    leaderNameEn: 'Leader Name (English)',
+    leaderTitleUk: 'Leader Position (Ukrainian)',
+    leaderTitleEn: 'Leader Position (English)',
+    leaderBioUk: 'Leader Biography (Ukrainian)',
+    leaderBioEn: 'Leader Biography (English)',
+    leaderPhoto: 'Leader Photo',
+    gallery: 'Image Gallery',
+    addImage: 'Add Image',
+    uploadImage: 'Upload Image',
+    imageCaption: 'Caption',
+    removeImage: 'Remove',
+    
     save: 'Save Changes',
     saving: 'Saving...',
     loading: 'Loading...',
-    helper: 'Note: News on homepage automatically shows the latest 3 articles.'
   }
+};
+
+type GalleryImage = {
+  url: string;
+  caption: string;
+  order: number;
 };
 
 export default function EditHomePage() {
@@ -52,16 +73,18 @@ export default function EditHomePage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    heroTitle_uk: '',
-    heroTitle_en: '',
-    heroSubtitle_uk: '',
-    heroSubtitle_en: '',
-    readMore_uk: '',
-    readMore_en: '',
-    voiceMatters_uk: '',
-    voiceMatters_en: '',
     newsTitle_uk: '',
-    newsTitle_en: ''
+    newsTitle_en: '',
+    orgDescription_uk: '',
+    orgDescription_en: '',
+    leaderName_uk: '',
+    leaderName_en: '',
+    leaderTitle_uk: '',
+    leaderTitle_en: '',
+    leaderBio_uk: '',
+    leaderBio_en: '',
+    leaderImageUrl: '',
+    galleryImages: [] as GalleryImage[]
   });
 
   useEffect(() => {
@@ -83,16 +106,18 @@ export default function EditHomePage() {
 
     if (data) {
       setFormData({
-        heroTitle_uk: data.content_uk.heroTitle || '',
-        heroTitle_en: data.content_en.heroTitle || '',
-        heroSubtitle_uk: data.content_uk.heroSubtitle || '',
-        heroSubtitle_en: data.content_en.heroSubtitle || '',
-        readMore_uk: data.content_uk.readMore || '',
-        readMore_en: data.content_en.readMore || '',
-        voiceMatters_uk: data.content_uk.voiceMatters || '',
-        voiceMatters_en: data.content_en.voiceMatters || '',
         newsTitle_uk: data.content_uk.newsTitle || '',
-        newsTitle_en: data.content_en.newsTitle || ''
+        newsTitle_en: data.content_en.newsTitle || '',
+        orgDescription_uk: data.content_uk.orgDescription || '',
+        orgDescription_en: data.content_en.orgDescription || '',
+        leaderName_uk: data.content_uk.leaderName || '',
+        leaderName_en: data.content_en.leaderName || '',
+        leaderTitle_uk: data.content_uk.leaderTitle || '',
+        leaderTitle_en: data.content_en.leaderTitle || '',
+        leaderBio_uk: data.content_uk.leaderBio || '',
+        leaderBio_en: data.content_en.leaderBio || '',
+        leaderImageUrl: data.content_uk.leaderImageUrl || '',
+        galleryImages: data.content_uk.galleryImages || []
       });
     }
     setLoading(false);
@@ -100,6 +125,47 @@ export default function EditHomePage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleLeaderPhotoUpload = (url: string) => {
+    setFormData(prev => ({ ...prev, leaderImageUrl: url }));
+  };
+
+  const addGalleryImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      galleryImages: [
+        ...prev.galleryImages,
+        { url: '', caption: '', order: prev.galleryImages.length }
+      ]
+    }));
+  };
+
+  const handleGalleryImageUpload = (index: number, url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      galleryImages: prev.galleryImages.map((img, i) => 
+        i === index ? { ...img, url } : img
+      )
+    }));
+  };
+
+  const updateGalleryCaption = (index: number, caption: string) => {
+    setFormData(prev => ({
+      ...prev,
+      galleryImages: prev.galleryImages.map((img, i) => 
+        i === index ? { ...img, caption } : img
+      )
+    }));
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      galleryImages: prev.galleryImages
+        .filter((_, i) => i !== index)
+        .map((img, i) => ({ ...img, order: i }))
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,25 +176,32 @@ export default function EditHomePage() {
       .from('pages')
       .update({
         content_uk: {
-          heroTitle: formData.heroTitle_uk,
-          heroSubtitle: formData.heroSubtitle_uk,
-          readMore: formData.readMore_uk,
-          voiceMatters: formData.voiceMatters_uk,
-          newsTitle: formData.newsTitle_uk
+          newsTitle: formData.newsTitle_uk,
+          orgDescription: formData.orgDescription_uk,
+          leaderName: formData.leaderName_uk,
+          leaderTitle: formData.leaderTitle_uk,
+          leaderBio: formData.leaderBio_uk,
+          leaderImageUrl: formData.leaderImageUrl,
+          galleryImages: formData.galleryImages
         },
         content_en: {
-          heroTitle: formData.heroTitle_en,
-          heroSubtitle: formData.heroSubtitle_en,
-          readMore: formData.readMore_en,
-          voiceMatters: formData.voiceMatters_en,
-          newsTitle: formData.newsTitle_en
+          newsTitle: formData.newsTitle_en,
+          orgDescription: formData.orgDescription_en,
+          leaderName: formData.leaderName_en,
+          leaderTitle: formData.leaderTitle_en,
+          leaderBio: formData.leaderBio_en,
+          leaderImageUrl: formData.leaderImageUrl,
+          galleryImages: formData.galleryImages
         },
         updated_at: new Date().toISOString()
       })
       .eq('id', 'home');
 
     if (!error) {
+      alert('Changes saved successfully!');
       router.push('/admin/pages');
+    } else {
+      alert('Error saving: ' + error.message);
     }
     setSubmitting(false);
   };
@@ -161,126 +234,205 @@ export default function EditHomePage() {
       <main className="max-w-4xl mx-auto px-6 py-12">
         <h1 className="text-4xl font-bold mb-8">{t.editHome}</h1>
 
-        <div className="bg-blue-500/20 border border-blue-500 text-blue-400 p-4 rounded-lg mb-8">
-          {t.helper}
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          
+          {/* ORGANIZATION DESCRIPTION */}
+          <div className="border-t border-gray-800 pt-8">
+            <h2 className="text-2xl font-bold mb-6">📝 Organization Description</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.orgDescUk}</label>
+                <textarea
+                  name="orgDescription_uk"
+                  value={formData.orgDescription_uk}
+                  onChange={handleChange}
+                  rows={6}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors resize-none"
+                  placeholder="Опис організації..."
+                />
+              </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Hero Title */}
-          <div>
-            <label className="block text-sm font-bold mb-2">{t.heroTitleUk}</label>
-            <input
-              type="text"
-              name="heroTitle_uk"
-              value={formData.heroTitle_uk}
-              onChange={handleChange}
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-            />
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.orgDescEn}</label>
+                <textarea
+                  name="orgDescription_en"
+                  value={formData.orgDescription_en}
+                  onChange={handleChange}
+                  rows={6}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors resize-none"
+                  placeholder="Organization description..."
+                />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold mb-2">{t.heroTitleEn}</label>
-            <input
-              type="text"
-              name="heroTitle_en"
-              value={formData.heroTitle_en}
-              onChange={handleChange}
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-            />
+          {/* LEADER SECTION */}
+          <div className="border-t border-gray-800 pt-8">
+            <h2 className="text-2xl font-bold mb-6">👤 Leader Information</h2>
+            
+            <div className="space-y-6">
+              {/* Leader Photo Upload */}
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+                <h3 className="text-lg font-bold mb-4">{t.leaderPhoto}</h3>
+                <ImageUpload
+                  bucket="leader-photos"
+                  onUploadComplete={handleLeaderPhotoUpload}
+                  currentImage={formData.leaderImageUrl}
+                  label={t.uploadImage}
+                />
+              </div>
+
+              {/* Leader Name */}
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.leaderNameUk}</label>
+                <input
+                  type="text"
+                  name="leaderName_uk"
+                  value={formData.leaderName_uk}
+                  onChange={handleChange}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.leaderNameEn}</label>
+                <input
+                  type="text"
+                  name="leaderName_en"
+                  value={formData.leaderName_en}
+                  onChange={handleChange}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
+                />
+              </div>
+
+              {/* Leader Title/Position */}
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.leaderTitleUk}</label>
+                <input
+                  type="text"
+                  name="leaderTitle_uk"
+                  value={formData.leaderTitle_uk}
+                  onChange={handleChange}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.leaderTitleEn}</label>
+                <input
+                  type="text"
+                  name="leaderTitle_en"
+                  value={formData.leaderTitle_en}
+                  onChange={handleChange}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
+                />
+              </div>
+
+              {/* Leader Biography */}
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.leaderBioUk}</label>
+                <textarea
+                  name="leaderBio_uk"
+                  value={formData.leaderBio_uk}
+                  onChange={handleChange}
+                  rows={6}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.leaderBioEn}</label>
+                <textarea
+                  name="leaderBio_en"
+                  value={formData.leaderBio_en}
+                  onChange={handleChange}
+                  rows={6}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors resize-none"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Hero Subtitle */}
-          <div>
-            <label className="block text-sm font-bold mb-2">{t.heroSubtitleUk}</label>
-            <textarea
-              name="heroSubtitle_uk"
-              value={formData.heroSubtitle_uk}
-              onChange={handleChange}
-              rows={2}
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors resize-none"
-            />
+          {/* GALLERY */}
+          <div className="border-t border-gray-800 pt-8">
+            <h2 className="text-2xl font-bold mb-6">🖼️ {t.gallery}</h2>
+            
+            <div className="space-y-4">
+              {formData.galleryImages.map((image, index) => (
+                <div key={index} className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="text-sm font-bold text-gray-400">Image {index + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(index)}
+                      className="text-red-500 hover:text-red-400 text-sm font-bold"
+                    >
+                      {t.removeImage}
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {/* Image Upload */}
+                    <ImageUpload
+                      bucket="gallery-images"
+                      onUploadComplete={(url) => handleGalleryImageUpload(index, url)}
+                      currentImage={image.url}
+                      label={t.uploadImage}
+                    />
+                    
+                    {/* Caption */}
+                    <div>
+                      <label className="block text-sm font-bold mb-2">{t.imageCaption}</label>
+                      <input
+                        type="text"
+                        value={image.caption}
+                        onChange={(e) => updateGalleryCaption(index, e.target.value)}
+                        className="w-full bg-black border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+                        placeholder="Image caption..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              <button
+                type="button"
+                onClick={addGalleryImage}
+                className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white px-4 py-3 rounded-lg font-bold transition-colors"
+              >
+                + {t.addImage}
+              </button>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold mb-2">{t.heroSubtitleEn}</label>
-            <textarea
-              name="heroSubtitle_en"
-              value={formData.heroSubtitle_en}
-              onChange={handleChange}
-              rows={2}
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors resize-none"
-            />
-          </div>
+          {/* NEWS TITLE */}
+          <div className="border-t border-gray-800 pt-8">
+            <h2 className="text-2xl font-bold mb-6">📰 News Section</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.newsTitleUk}</label>
+                <input
+                  type="text"
+                  name="newsTitle_uk"
+                  value={formData.newsTitle_uk}
+                  onChange={handleChange}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
+                />
+              </div>
 
-          {/* Read More Button */}
-          <div>
-            <label className="block text-sm font-bold mb-2">{t.readMoreUk}</label>
-            <input
-              type="text"
-              name="readMore_uk"
-              value={formData.readMore_uk}
-              onChange={handleChange}
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold mb-2">{t.readMoreEn}</label>
-            <input
-              type="text"
-              name="readMore_en"
-              value={formData.readMore_en}
-              onChange={handleChange}
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-            />
-          </div>
-
-          {/* Voice Matters */}
-          <div>
-            <label className="block text-sm font-bold mb-2">{t.voiceMattersUk}</label>
-            <input
-              type="text"
-              name="voiceMatters_uk"
-              value={formData.voiceMatters_uk}
-              onChange={handleChange}
-              placeholder="Голос Важливий"
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold mb-2">{t.voiceMattersEn}</label>
-            <input
-              type="text"
-              name="voiceMatters_en"
-              value={formData.voiceMatters_en}
-              onChange={handleChange}
-              placeholder="Voice Matters"
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-            />
-          </div>
-
-          {/* News Title */}
-          <div>
-            <label className="block text-sm font-bold mb-2">{t.newsTitleUk}</label>
-            <input
-              type="text"
-              name="newsTitle_uk"
-              value={formData.newsTitle_uk}
-              onChange={handleChange}
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold mb-2">{t.newsTitleEn}</label>
-            <input
-              type="text"
-              name="newsTitle_en"
-              value={formData.newsTitle_en}
-              onChange={handleChange}
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-            />
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.newsTitleEn}</label>
+                <input
+                  type="text"
+                  name="newsTitle_en"
+                  value={formData.newsTitle_en}
+                  onChange={handleChange}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Submit */}
