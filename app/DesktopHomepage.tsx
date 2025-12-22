@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from './context/LanguageContext';
 import { supabase } from './lib/supabase';
 import LoadingSpinner from './components/LoadingSpinner';
+import Image from 'next/image';
 
 type GalleryImage = {
   url: string;
@@ -33,6 +34,19 @@ type NewsItem = {
   main_image: string | null;
   category_uk: string;
   category_en: string;
+};
+
+// Helper function to get optimized Supabase image URL
+const getOptimizedImageUrl = (url: string, width: number = 800, quality: number = 80) => {
+  if (!url) return url;
+  
+  // Check if it's a Supabase storage URL
+  if (url.includes('supabase.co/storage/v1/object/public/')) {
+    // Add transformation parameters
+    return `${url}?width=${width}&quality=${quality}`;
+  }
+  
+  return url;
 };
 
 export default function DesktopHomepage() {
@@ -99,6 +113,7 @@ export default function DesktopHomepage() {
                 src="/flags/main_flag.png"
                 alt={t.romaCouncil}
                 className="w-full max-w-2xl object-contain drop-shadow-2xl"
+                loading="eager"
               />
             </div>
 
@@ -107,6 +122,7 @@ export default function DesktopHomepage() {
               src="/flags/ukrainian.png"
               alt="Ukrainian Flag"
               className="w-full aspect-[3/2] object-cover rounded-lg shadow-xl"
+              loading="eager"
             />
 
             {/* Romani Flag */}
@@ -114,11 +130,12 @@ export default function DesktopHomepage() {
               src="/flags/romani.png"
               alt="Romani Flag"
               className="w-full aspect-[3/2] object-cover rounded-lg shadow-xl"
+              loading="eager"
             />
           </div>
         </section>
 
-        {/* GALLERY SECTION - No title, plain display, many images */}
+        {/* GALLERY SECTION - Optimized lazy loading */}
         {homeContent?.galleryImages && homeContent.galleryImages.length > 0 && (
           <section className="py-20 px-12">
             <div className="max-w-7xl mx-auto">
@@ -126,11 +143,13 @@ export default function DesktopHomepage() {
                 {homeContent.galleryImages
                   .sort((a, b) => a.order - b.order)
                   .map((image, index) => (
-                    <div key={index} className="relative overflow-hidden">
+                    <div key={index} className="relative overflow-hidden bg-gray-900">
                       <img 
-                        src={image.url}
+                        src={getOptimizedImageUrl(image.url, 600, 75)}
                         alt={image.caption || `Image ${index + 1}`}
                         className="w-full aspect-square object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                       {image.caption && (
                         <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
@@ -150,12 +169,14 @@ export default function DesktopHomepage() {
             <div className="max-w-6xl mx-auto">
               <h2 className="text-5xl font-bold mb-12 text-center">{t.ourLeader}</h2>
               <div className="grid md:grid-cols-2 gap-12 items-center">
-                {/* Leader Photo */}
-                <div className="relative">
+                {/* Leader Photo - Optimized */}
+                <div className="relative bg-gray-900">
                   <img 
-                    src={homeContent.leaderImageUrl || '/placeholder-leader.jpg'}
+                    src={getOptimizedImageUrl(homeContent.leaderImageUrl, 800, 85)}
                     alt={homeContent.leaderName}
                     className="w-full aspect-square object-cover rounded-2xl shadow-2xl"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
 
@@ -183,7 +204,7 @@ export default function DesktopHomepage() {
         </section>
 
         {/* NEWS SECTION */}
-        <section id="news" className="py-20 px-12 bg-gray-900/50">
+        <section id="news" className="py-20 px-12 bg-gray-900">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-5xl font-bold mb-12 text-center">{homeContent?.newsTitle}</h2>
             <div className="grid md:grid-cols-3 gap-8">
@@ -194,6 +215,8 @@ export default function DesktopHomepage() {
                       src={item.main_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=400&h=300'}
                       alt={lang === 'uk' ? item.title_uk : item.title_en}
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                   <span className="text-green-500 text-sm font-bold">

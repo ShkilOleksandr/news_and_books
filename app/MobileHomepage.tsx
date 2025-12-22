@@ -35,6 +35,19 @@ type NewsItem = {
   category_en: string;
 };
 
+// Helper function to get optimized Supabase image URL
+const getOptimizedImageUrl = (url: string, width: number = 600, quality: number = 75) => {
+  if (!url) return url;
+  
+  // Check if it's a Supabase storage URL
+  if (url.includes('supabase.co/storage/v1/object/public/')) {
+    // Add transformation parameters for mobile
+    return `${url}?width=${width}&quality=${quality}`;
+  }
+  
+  return url;
+};
+
 export default function MobileHomepage() {
   const { lang } = useLanguage();
   const [loading, setLoading] = useState(true);
@@ -97,6 +110,7 @@ export default function MobileHomepage() {
               src="/flags/main_flag.png"
               alt={t.romaCouncil}
               className="w-full object-contain drop-shadow-2xl"
+              loading="eager"
             />
           </div>
         </section>
@@ -107,27 +121,31 @@ export default function MobileHomepage() {
             src="/flags/ukrainian.png"
             alt="Ukrainian Flag"
             className="w-full aspect-[3/2] object-cover rounded-lg shadow-lg"
+            loading="eager"
           />
 
           <img 
             src="/flags/romani.png"
             alt="Romani Flag"
             className="w-full aspect-[3/2] object-cover rounded-lg shadow-lg"
+            loading="eager"
           />
         </section>
 
-        {/* GALLERY SECTION - No title, plain display */}
+        {/* GALLERY SECTION - Optimized for mobile */}
         {homeContent?.galleryImages && homeContent.galleryImages.length > 0 && (
           <section className="py-12">
             <div className="grid grid-cols-2 gap-3">
               {homeContent.galleryImages
                 .sort((a, b) => a.order - b.order)
                 .map((image, index) => (
-                  <div key={index} className="relative overflow-hidden">
+                  <div key={index} className="relative overflow-hidden bg-gray-900">
                     <img 
-                      src={image.url}
+                      src={getOptimizedImageUrl(image.url, 400, 70)}
                       alt={image.caption || `Image ${index + 1}`}
                       className="w-full aspect-square object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                     {image.caption && (
                       <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
@@ -145,12 +163,14 @@ export default function MobileHomepage() {
           <section className="py-12">
             <h2 className="text-3xl font-bold mb-8 text-center">{t.ourLeader}</h2>
             <div className="space-y-6">
-              {/* Leader Photo */}
-              <div className="relative">
+              {/* Leader Photo - Optimized */}
+              <div className="relative bg-gray-900">
                 <img 
-                  src={homeContent.leaderImageUrl || '/placeholder-leader.jpg'}
+                  src={getOptimizedImageUrl(homeContent.leaderImageUrl, 600, 80)}
                   alt={homeContent.leaderName}
                   className="w-full aspect-square object-cover rounded-2xl shadow-2xl"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
 
@@ -175,36 +195,39 @@ export default function MobileHomepage() {
         </section>
 
         {/* NEWS */}
-        <section className="py-12">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-8 text-center">{homeContent?.newsTitle}</h2>
+        <section className="py-12 bg-gray-900">
+          <div className="px-4">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-8 text-center">{homeContent?.newsTitle}</h2>
 
-          <div className="space-y-6">
-            {featuredNews.map((item) => (
-              <a key={item.id} href={`/news/${item.id}`} className="block group">
-                <div className="bg-gray-900 rounded-lg overflow-hidden">
-                  <div className="aspect-video overflow-hidden">
-                    <img
-                      src={item.main_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&h=400'}
-                      alt={lang === 'uk' ? item.title_uk : item.title_en}
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
-                    />
+            <div className="space-y-6">
+              {featuredNews.map((item) => (
+                <a key={item.id} href={`/news/${item.id}`} className="block group">
+                  <div className="bg-gray-800 rounded-lg overflow-hidden">
+                    <div className="aspect-video overflow-hidden">
+                      <img
+                        src={item.main_image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&h=400'}
+                        alt={lang === 'uk' ? item.title_uk : item.title_en}
+                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <span className="text-green-500 text-xs font-bold uppercase">
+                        {lang === 'uk' ? item.category_uk : item.category_en}
+                      </span>
+                      <h3 className="text-xl font-bold mt-2 mb-2 group-hover:text-green-500 transition-colors">
+                        {lang === 'uk' ? item.title_uk : item.title_en}
+                      </h3>
+                      <p className="text-gray-400 text-sm line-clamp-2">
+                        {lang === 'uk' ? item.excerpt_uk : item.excerpt_en}
+                      </p>
+                    </div>
                   </div>
-                  <div className="p-4">
-                    <span className="text-green-500 text-xs font-bold uppercase">
-                      {lang === 'uk' ? item.category_uk : item.category_en}
-                    </span>
-                    <h3 className="text-xl font-bold mt-2 mb-2 group-hover:text-green-500 transition-colors">
-                      {lang === 'uk' ? item.title_uk : item.title_en}
-                    </h3>
-                    <p className="text-gray-400 text-sm line-clamp-2">
-                      {lang === 'uk' ? item.excerpt_uk : item.excerpt_en}
-                    </p>
-                  </div>
-                </div>
-              </a>
-            ))}
+                </a>
+              ))}
+            </div>
           </div>
-
         </section>
 
       </main>
