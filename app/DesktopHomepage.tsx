@@ -174,7 +174,7 @@ export default function DesktopHomepage() {
                   <img 
                     src={getOptimizedImageUrl(homeContent.leaderImageUrl, 800, 85)}
                     alt={homeContent.leaderName}
-                    className="w-full aspect-square object-cover rounded-2xl shadow-2xl"
+                    className="w-full aspect-[3/4] object-cover rounded-2xl shadow-2xl"
                     loading="lazy"
                     decoding="async"
                   />

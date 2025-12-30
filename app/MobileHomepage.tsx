@@ -168,7 +168,7 @@ export default function MobileHomepage() {
                 <img 
                   src={getOptimizedImageUrl(homeContent.leaderImageUrl, 600, 80)}
                   alt={homeContent.leaderName}
-                  className="w-full aspect-square object-cover rounded-2xl shadow-2xl"
+                  className="w-full aspect-[3/4] object-cover rounded-2xl shadow-2xl"
                   loading="lazy"
                   decoding="async"
                 />
