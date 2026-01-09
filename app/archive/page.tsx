@@ -8,6 +8,7 @@ import LoadingSpinner from '@/app/components/LoadingSpinner';
 const translations = {
   uk: {
     title: 'Архів',
+    search: 'Пошук...',
     allCategories: 'Всі категорії',
     noDocuments: 'Немає документів',
     views: 'переглядів',
@@ -17,10 +18,15 @@ const translations = {
     play: 'Відтворити',
     listen: 'Прослухати',
     duration: 'Тривалість',
-    fileSize: 'Розмір файлу'
+    fileSize: 'Розмір файлу',
+    delete: 'Видалити',
+    confirmDelete: 'Ви впевнені, що хочете видалити цей елемент?',
+    deleted: 'Елемент видалено',
+    errorDeleting: 'Помилка при видаленні'
   },
   en: {
     title: 'Archive',
+    search: 'Search...',
     allCategories: 'All Categories',
     noDocuments: 'No documents',
     views: 'views',
@@ -30,7 +36,11 @@ const translations = {
     play: 'Play',
     listen: 'Listen',
     duration: 'Duration',
-    fileSize: 'File Size'
+    fileSize: 'File Size',
+    delete: 'Delete',
+    confirmDelete: 'Are you sure you want to delete this item?',
+    deleted: 'Item deleted',
+    errorDeleting: 'Error deleting'
   }
 };
 
@@ -56,25 +66,55 @@ type Document = {
   } | null;
 };
 
+// HARDCODED ADMIN EMAIL
+const ADMIN_EMAIL = 'romanewsukraine@gmail.com';
+
 export default function ArchivePage() {
   const { lang } = useLanguage();
   const t = translations[lang];
 
+  const [allDocuments, setAllDocuments] = useState<Document[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedMedia, setSelectedMedia] = useState<Document | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [deleting, setDeleting] = useState<number | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    checkAdmin();
   }, []);
 
   useEffect(() => {
     loadCategories();
     loadDocuments();
-  }, [selectedCategory]);
+  }, []);
+
+  useEffect(() => {
+    filterDocuments();
+  }, [selectedCategory, searchQuery, allDocuments]);
+
+  async function checkAdmin() {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
+
+    // HARDCODED: Check if user email is admin email
+    const isAdminUser = user.email === ADMIN_EMAIL;
+    
+    console.log('🔍 User email:', user.email);
+    console.log('🔍 Admin email:', ADMIN_EMAIL);
+    console.log('✅ Is admin:', isAdminUser);
+    
+    setIsAdmin(isAdminUser);
+  }
 
   async function loadCategories() {
     const { data } = await supabase
@@ -86,24 +126,66 @@ export default function ArchivePage() {
   }
 
   async function loadDocuments() {
-    let query = supabase
+    const { data } = await supabase
       .from('archive_documents')
       .select(`
         *,
         category:archive_categories(id, name_uk, name_en)
       `)
       .order('created_at', { ascending: false });
-
-    if (selectedCategory) {
-      query = query.eq('category_id', selectedCategory);
-    }
-
-    const { data } = await query;
     
     if (data) {
+      setAllDocuments(data as any);
       setDocuments(data as any);
     }
     setLoading(false);
+  }
+
+  function filterDocuments() {
+    let filtered = allDocuments;
+
+    if (selectedCategory) {
+      filtered = filtered.filter(doc => doc.category?.id === selectedCategory);
+    }
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(doc => {
+        const title = (lang === 'uk' ? doc.title_uk : doc.title_en).toLowerCase();
+        const description = (lang === 'uk' ? doc.description_uk : doc.description_en).toLowerCase();
+        return title.includes(query) || description.includes(query);
+      });
+    }
+
+    setDocuments(filtered);
+  }
+
+  async function handleDelete(docId: number) {
+    if (!confirm(t.confirmDelete)) {
+      return;
+    }
+
+    setDeleting(docId);
+
+    try {
+      const { error } = await supabase
+        .from('archive_documents')
+        .delete()
+        .eq('id', docId);
+
+      if (error) {
+        throw error;
+      }
+
+      setAllDocuments(allDocuments.filter(doc => doc.id !== docId));
+      setDocuments(documents.filter(doc => doc.id !== docId));
+      alert(t.deleted);
+    } catch (error: any) {
+      console.error('Error deleting:', error);
+      alert(t.errorDeleting + ': ' + error.message);
+    } finally {
+      setDeleting(null);
+    }
   }
 
   async function incrementViewCount(docId: number) {
@@ -157,6 +239,17 @@ export default function ArchivePage() {
     <div className="min-h-screen text-white pt-24 pb-20 px-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">{t.title}</h1>
+
+        {/* Search Bar */}
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder={t.search}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-gray-900 border border-gray-800 rounded-lg px-6 py-4 text-lg focus:outline-none focus:border-green-500 transition-colors"
+          />
+        </div>
 
         {/* Category Filter */}
         <div className="mb-8 flex flex-wrap gap-3">
@@ -247,7 +340,8 @@ export default function ArchivePage() {
                     <span>👁️ {doc.view_count} {t.views}</span>
                     <span>⬇️ {doc.download_count} {t.downloads}</span>
                   </div>
-                  <div className="flex gap-3">
+                  
+                  <div className="flex gap-2">
                     <button
                       onClick={() => handleView(doc)}
                       className="flex-1 bg-green-500 hover:bg-green-400 text-black px-4 py-3 rounded-lg font-bold transition-colors"
@@ -263,6 +357,18 @@ export default function ArchivePage() {
                     >
                       ⬇️
                     </button>
+                    
+                    {/* DELETE BUTTON - Shows only for hardcoded admin email */}
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleDelete(doc.id)}
+                        disabled={deleting === doc.id}
+                        className="bg-red-500 hover:bg-red-400 text-white px-4 py-3 rounded-lg font-bold transition-colors disabled:opacity-50"
+                        title={t.delete}
+                      >
+                        {deleting === doc.id ? '⏳' : '🗑️'}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
