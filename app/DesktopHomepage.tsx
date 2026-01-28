@@ -135,6 +135,37 @@ export default function DesktopHomepage() {
           </div>
         </section>
 
+        {/* LEADER SECTION */}
+        {homeContent?.leaderName && (
+          <section className="py-20 px-12 bg-gray-900/50">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-5xl font-bold mb-12 text-center">{t.ourLeader}</h2>
+              <div className="flex flex-col md:flex-row gap-8">
+                {/* Leader Info */}
+                <div className="flex-1">
+                  <h3 className="text-4xl font-bold mb-2">{homeContent.leaderName}</h3>
+                  <p className="text-2xl text-green-500 mb-6">{homeContent.leaderTitle}</p>
+
+                  {/* Leader Photo - Positioned within text */}
+                  <div className="float-left mr-8 mb-6 w-64 md:w-80">
+                    <img
+                      src={getOptimizedImageUrl(homeContent.leaderImageUrl, 800, 85)}
+                      alt={homeContent.leaderName}
+                      className="w-full aspect-[3/4] object-cover rounded-2xl shadow-2xl"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+
+                  <div className="text-lg leading-relaxed text-gray-300 whitespace-pre-line">
+                    {homeContent.leaderBio}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* GALLERY SECTION - Optimized lazy loading */}
         {homeContent?.galleryImages && homeContent.galleryImages.length > 0 && (
           <section className="py-20 px-12">
@@ -144,7 +175,7 @@ export default function DesktopHomepage() {
                   .sort((a, b) => a.order - b.order)
                   .map((image, index) => (
                     <div key={index} className="relative overflow-hidden bg-gray-900">
-                      <img 
+                      <img
                         src={getOptimizedImageUrl(image.url, 600, 75)}
                         alt={image.caption || `Image ${index + 1}`}
                         className="w-full aspect-square object-cover"
@@ -158,36 +189,6 @@ export default function DesktopHomepage() {
                       )}
                     </div>
                   ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* LEADER SECTION */}
-        {homeContent?.leaderName && (
-          <section className="py-20 px-12 bg-gray-900/50">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-5xl font-bold mb-12 text-center">{t.ourLeader}</h2>
-              <div className="grid md:grid-cols-2 gap-12 items-center">
-                {/* Leader Photo - Optimized */}
-                <div className="relative bg-gray-900">
-                  <img 
-                    src={getOptimizedImageUrl(homeContent.leaderImageUrl, 800, 85)}
-                    alt={homeContent.leaderName}
-                    className="w-full aspect-[3/4] object-cover rounded-2xl shadow-2xl"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-
-                {/* Leader Info */}
-                <div>
-                  <h3 className="text-4xl font-bold mb-2">{homeContent.leaderName}</h3>
-                  <p className="text-2xl text-green-500 mb-6">{homeContent.leaderTitle}</p>
-                  <div className="text-lg leading-relaxed text-gray-300 whitespace-pre-line">
-                    {homeContent.leaderBio}
-                  </div>
-                </div>
               </div>
             </div>
           </section>
