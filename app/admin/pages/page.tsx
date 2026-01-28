@@ -10,8 +10,11 @@ const translations = {
     pages: 'Сторінки',
     backToDashboard: 'Назад до панелі',
     edit: 'Редагувати',
+    manage: 'Управління',
     aboutPage: 'Про нас',
     contactPage: 'Контакти',
+    homePage: 'Головна',
+    teamMembers: 'Команда',
     lastUpdated: 'Оновлено',
     loading: 'Завантаження...'
   },
@@ -19,8 +22,11 @@ const translations = {
     pages: 'Pages',
     backToDashboard: 'Back to Dashboard',
     edit: 'Edit',
+    manage: 'Manage',
     aboutPage: 'About',
     contactPage: 'Contact',
+    homePage: 'Home',
+    teamMembers: 'Team',
     lastUpdated: 'Updated',
     loading: 'Loading...'
   }
@@ -90,27 +96,50 @@ export default function AdminPagesPage() {
       <main className="max-w-4xl mx-auto px-6 py-12">
         <h1 className="text-4xl font-bold mb-8">{t.pages}</h1>
 
-        <div className="bg-gray-900 rounded-xl overflow-hidden divide-y divide-gray-800">
-          {pages.map((page) => (
-            <div key={page.id} className="p-6 flex items-center justify-between hover:bg-gray-800 transition-colors">
+        <div className="space-y-4">
+          {/* Team Members - Special Card */}
+          <div className="bg-gray-900 border-2 border-green-500/30 rounded-xl p-6 hover:border-green-500 transition-colors">
+            <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-bold mb-2">
-                  {lang === 'uk' ? page.title_uk : page.title_en}
+                <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
+                  👥 {t.teamMembers}
                 </h3>
-                <p className="text-sm text-gray-400" suppressHydrationWarning>
-                  {t.lastUpdated}: {new Date(page.updated_at).toLocaleDateString()}
+                <p className="text-sm text-gray-400">
+                  {lang === 'uk' ? 'Керування членами команди (фото, імена, посади, біографії)' : 'Manage team members (photos, names, positions, bios)'}
                 </p>
               </div>
               
-              
               <a
-                href={`/admin/pages/${page.id}/edit`}
+                href="/admin/pages/team/edit"
                 className="bg-green-500 text-black px-6 py-3 rounded-lg font-bold hover:bg-green-400 transition-colors"
               >
-                {t.edit}
+                {t.manage}
               </a>
             </div>
-          ))}
+          </div>
+
+          {/* Regular Pages */}
+          <div className="bg-gray-900 rounded-xl overflow-hidden divide-y divide-gray-800">
+            {pages.map((page) => (
+              <div key={page.id} className="p-6 flex items-center justify-between hover:bg-gray-800 transition-colors">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">
+                    {lang === 'uk' ? page.title_uk : page.title_en}
+                  </h3>
+                  <p className="text-sm text-gray-400" suppressHydrationWarning>
+                    {t.lastUpdated}: {new Date(page.updated_at).toLocaleDateString()}
+                </p>
+                </div>
+                
+                <a
+                  href={`/admin/pages/${page.id}/edit`}
+                  className="bg-green-500 text-black px-6 py-3 rounded-lg font-bold hover:bg-green-400 transition-colors"
+                >
+                  {t.edit}
+                </a>
+              </div>
+            ))}
+          </div>
         </div>
       </main>
     </div>

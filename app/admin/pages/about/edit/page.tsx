@@ -19,15 +19,6 @@ const translations = {
     titleEn: 'Назва (English)',
     textUk: 'Текст (Українська)',
     textEn: 'Текст (English)',
-    teamMembers: 'Члени команди',
-    teamMember: 'Член команди',
-    nameUk: 'Ім\'я (Українська)',
-    nameEn: 'Ім\'я (English)',
-    roleUk: 'Посада (Українська)',
-    roleEn: 'Посада (English)',
-    photoUrl: 'URL фото',
-    addMember: '+ Додати члена команди',
-    removeMember: 'Видалити',
     save: 'Зберегти',
     saving: 'Збереження...',
     loading: 'Завантаження...'
@@ -45,25 +36,10 @@ const translations = {
     titleEn: 'Title (English)',
     textUk: 'Text (Ukrainian)',
     textEn: 'Text (English)',
-    teamMembers: 'Team Members',
-    teamMember: 'Team Member',
-    nameUk: 'Name (Ukrainian)',
-    nameEn: 'Name (English)',
-    roleUk: 'Role (Ukrainian)',
-    roleEn: 'Role (English)',
-    photoUrl: 'Photo URL',
-    addMember: '+ Add Team Member',
-    removeMember: 'Remove',
     save: 'Save Changes',
     saving: 'Saving...',
     loading: 'Loading...'
   }
-};
-
-type TeamMember = {
-  name: string;
-  role: string;
-  image: string;
 };
 
 export default function EditAboutPage() {
@@ -87,9 +63,7 @@ export default function EditAboutPage() {
       { title: '', text: '' },
       { title: '', text: '' },
       { title: '', text: '' }
-    ],
-    teamMembers_uk: [] as TeamMember[],
-    teamMembers_en: [] as TeamMember[]
+    ]
   });
 
   useEffect(() => {
@@ -116,9 +90,7 @@ export default function EditAboutPage() {
         teamText_uk: data.content_uk.teamText || '',
         teamText_en: data.content_en.teamText || '',
         values_uk: data.content_uk.values || [],
-        values_en: data.content_en.values || [],
-        teamMembers_uk: data.content_uk.teamMembers || [],
-        teamMembers_en: data.content_en.teamMembers || []
+        values_en: data.content_en.values || []
       });
     }
     setLoading(false);
@@ -137,31 +109,6 @@ export default function EditAboutPage() {
     }));
   };
 
-  const handleTeamMemberChange = (langKey: 'teamMembers_uk' | 'teamMembers_en', index: number, field: keyof TeamMember, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [langKey]: prev[langKey].map((item, i) => 
-        i === index ? { ...item, [field]: value } : item
-      )
-    }));
-  };
-
-  const addTeamMember = () => {
-    setFormData(prev => ({
-      ...prev,
-      teamMembers_uk: [...prev.teamMembers_uk, { name: '', role: '', image: '' }],
-      teamMembers_en: [...prev.teamMembers_en, { name: '', role: '', image: '' }]
-    }));
-  };
-
-  const removeTeamMember = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      teamMembers_uk: prev.teamMembers_uk.filter((_, i) => i !== index),
-      teamMembers_en: prev.teamMembers_en.filter((_, i) => i !== index)
-    }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -172,14 +119,12 @@ export default function EditAboutPage() {
         content_uk: {
           mission: formData.mission_uk,
           values: formData.values_uk,
-          teamText: formData.teamText_uk,
-          teamMembers: formData.teamMembers_uk
+          teamText: formData.teamText_uk
         },
         content_en: {
           mission: formData.mission_en,
           values: formData.values_en,
-          teamText: formData.teamText_en,
-          teamMembers: formData.teamMembers_en
+          teamText: formData.teamText_en
         },
         updated_at: new Date().toISOString()
       })
@@ -316,100 +261,6 @@ export default function EditAboutPage() {
               rows={3}
               className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors resize-none"
             />
-          </div>
-
-          {/* Team Members Ukrainian */}
-          <div className="pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-2xl font-bold">{t.teamMembers} (Українська)</h3>
-              <button
-                type="button"
-                onClick={addTeamMember}
-                className="bg-green-500 text-black px-4 py-2 rounded-lg font-bold hover:bg-green-400 transition-colors"
-              >
-                {t.addMember}
-              </button>
-            </div>
-            {formData.teamMembers_uk.map((member, index) => (
-              <div key={index} className="bg-gray-900 p-6 rounded-lg mb-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-bold">{t.teamMember} {index + 1}</h4>
-                  <button
-                    type="button"
-                    onClick={() => removeTeamMember(index)}
-                    className="bg-red-500/20 hover:bg-red-500/30 text-red-500 px-3 py-1 rounded transition-colors text-sm"
-                  >
-                    {t.removeMember}
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  <input
-                    type="text"
-                    placeholder={t.nameUk}
-                    value={member.name}
-                    onChange={(e) => handleTeamMemberChange('teamMembers_uk', index, 'name', e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-                  />
-                  <input
-                    type="text"
-                    placeholder={t.roleUk}
-                    value={member.role}
-                    onChange={(e) => handleTeamMemberChange('teamMembers_uk', index, 'role', e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-                  />
-                  <input
-                    type="url"
-                    placeholder={t.photoUrl}
-                    value={member.image}
-                    onChange={(e) => handleTeamMemberChange('teamMembers_uk', index, 'image', e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-                  />
-                  {member.image && (
-                    <div className="w-32 h-32 rounded-full overflow-hidden">
-                      <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Team Members English */}
-          <div className="pt-6">
-            <h3 className="text-2xl font-bold mb-4">{t.teamMembers} (English)</h3>
-            {formData.teamMembers_en.map((member, index) => (
-              <div key={index} className="bg-gray-900 p-6 rounded-lg mb-4">
-                <h4 className="font-bold mb-3">{t.teamMember} {index + 1}</h4>
-                <div className="space-y-3">
-                  <input
-                    type="text"
-                    placeholder={t.nameEn}
-                    value={member.name}
-                    onChange={(e) => handleTeamMemberChange('teamMembers_en', index, 'name', e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-                  />
-                  <input
-                    type="text"
-                    placeholder={t.roleEn}
-                    value={member.role}
-                    onChange={(e) => handleTeamMemberChange('teamMembers_en', index, 'role', e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-                  />
-                  <input
-                    type="url"
-                    placeholder={t.photoUrl}
-                    value={member.image}
-                    onChange={(e) => handleTeamMemberChange('teamMembers_en', index, 'image', e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
-                  />
-                  {member.image && (
-                    <div className="w-32 h-32 rounded-full overflow-hidden">
-                      <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
           </div>
 
           {/* Submit */}
