@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "preinstall": "npm audit --production",
     "security-check": "npm audit && npm outdated"
   },
   "dependencies": {
