@@ -135,6 +135,34 @@ export default function DesktopHomepage() {
           </div>
         </section>
 
+        {/* GALLERY SECTION - Optimized lazy loading */}
+        {homeContent?.galleryImages && homeContent.galleryImages.length > 0 && (
+          <section className="py-20 px-12">
+            <div className="max-w-7xl mx-auto">
+              <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {homeContent.galleryImages
+                  .sort((a, b) => a.order - b.order)
+                  .map((image, index) => (
+                    <div key={index} className="relative overflow-hidden bg-gray-900">
+                      <img
+                        src={getOptimizedImageUrl(image.url, 600, 75)}
+                        alt={image.caption || `Image ${index + 1}`}
+                        className="w-full aspect-square object-cover"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      {image.caption && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
+                          <p className="text-white text-sm">{image.caption}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* LEADER SECTION */}
         {homeContent?.leaderName && (
           <section className="py-20 px-12 bg-gray-900/50">
@@ -161,34 +189,6 @@ export default function DesktopHomepage() {
                     {homeContent.leaderBio}
                   </div>
                 </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* GALLERY SECTION - Optimized lazy loading */}
-        {homeContent?.galleryImages && homeContent.galleryImages.length > 0 && (
-          <section className="py-20 px-12">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {homeContent.galleryImages
-                  .sort((a, b) => a.order - b.order)
-                  .map((image, index) => (
-                    <div key={index} className="relative overflow-hidden bg-gray-900">
-                      <img
-                        src={getOptimizedImageUrl(image.url, 600, 75)}
-                        alt={image.caption || `Image ${index + 1}`}
-                        className="w-full aspect-square object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      {image.caption && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
-                          <p className="text-white text-sm">{image.caption}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
               </div>
             </div>
           </section>
