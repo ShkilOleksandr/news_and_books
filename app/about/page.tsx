@@ -23,6 +23,29 @@ type AboutContent = {
   values: Array<{ title: string; text: string }>;
 };
 
+function ExpandableBio({ bio }: { bio: string }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div
+      className="relative cursor-pointer"
+      onMouseEnter={() => setIsExpanded(true)}
+      onMouseLeave={() => setIsExpanded(false)}
+    >
+      <p
+        className={`text-gray-400 leading-relaxed whitespace-pre-line transition-all duration-300 ${
+          isExpanded ? '' : 'line-clamp-3'
+        }`}
+      >
+        {bio}
+      </p>
+      {!isExpanded && (
+        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none" />
+      )}
+    </div>
+  );
+}
+
 const translations = {
   uk: {
     title: 'Про нас',
@@ -170,9 +193,7 @@ export default function AboutPage() {
                       {lang === 'uk' ? member.position_uk : member.position_en}
                     </p>
                     {(member.bio_uk || member.bio_en) && (
-                      <p className="text-gray-400 leading-relaxed whitespace-pre-line">
-                        {lang === 'uk' ? member.bio_uk : member.bio_en}
-                      </p>
+                      <ExpandableBio bio={lang === 'uk' ? member.bio_uk : member.bio_en} />
                     )}
                   </div>
                 </div>
