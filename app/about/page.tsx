@@ -163,7 +163,7 @@ export default function AboutPage() {
               {t.noTeam}
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {teamMembers.map((member) => (
                 <div
                   key={member.id}
@@ -175,7 +175,7 @@ export default function AboutPage() {
                       <img
                         src={member.image_url}
                         alt={lang === 'uk' ? member.name_uk : member.name_en}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-6xl">
