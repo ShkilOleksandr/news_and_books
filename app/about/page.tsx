@@ -105,8 +105,8 @@ export default function AboutPage() {
   }
 
   return (
-    <div className="min-h-screen text-white pt-24 pb-20 px-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen text-white pt-24 pb-20 px-4 lg:px-8">
+      <div className="max-w-7xl mx-auto">
         
         {/* Header */}
         <h1 className="text-5xl font-bold mb-12 text-center">{t.title}</h1>
@@ -154,7 +154,7 @@ export default function AboutPage() {
           </div>
         )}
 
-        {/* Team Members Section - From new table */}
+        {/* Team Members Section - 5 per row with uniform height images */}
         <div className="mt-20">
           <h2 className="text-4xl font-bold mb-12 text-center">{t.ourTeam}</h2>
           
@@ -163,19 +163,19 @@ export default function AboutPage() {
               {t.noTeam}
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="flex flex-wrap justify-center gap-6">
               {teamMembers.map((member) => (
                 <div
                   key={member.id}
-                  className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-green-500 transition-all group"
+                  className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-green-500 transition-all group w-full sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)] xl:w-[calc(20%-19.2px)]"
                 >
-                  {/* Photo */}
-                  <div className="aspect-square bg-gray-800 overflow-hidden">
+                  {/* Photo - Fixed height with natural width */}
+                  <div className="bg-gray-800 overflow-hidden h-48 flex items-center justify-center">
                     {member.image_url ? (
                       <img
                         src={member.image_url}
                         alt={lang === 'uk' ? member.name_uk : member.name_en}
-                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                        className="h-full w-auto max-w-none group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-6xl">
