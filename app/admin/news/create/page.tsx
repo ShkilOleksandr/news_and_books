@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/app/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/app/context/LanguageContext';
@@ -9,56 +9,84 @@ const translations = {
   uk: {
     createArticle: 'Створити статтю',
     backToDashboard: 'Назад до панелі',
+    contentType: 'Тип контенту',
+    contentTypeText: 'Текст (HTML)',
+    contentTypePdf: 'PDF документ',
     titleUk: 'Заголовок (Українська)',
     titleEn: 'Заголовок (English)',
     excerptUk: 'Короткий опис (Українська)',
     excerptEn: 'Короткий опис (English)',
     contentUk: 'Контент (Українська)',
     contentEn: 'Контент (English)',
+    pdfFileUk: 'PDF файл (Українська)',
+    pdfFileEn: 'PDF файл (English)',
     categoryUk: 'Категорія (Українська)',
     categoryEn: 'Категорія (English)',
     authorUk: 'Автор (Українська)',
     authorEn: 'Автор (English)',
-    authorBioUk: 'Біографія автора (Українська)',      // ADD THIS
-    authorBioEn: 'Біографія автора (English)',         // ADD THIS
-    authorImage: 'Фото автора (URL)',                  // ADD THIS
+    authorBioUk: 'Біографія автора (Українська)',
+    authorBioEn: 'Біографія автора (English)',
+    authorImage: 'Фото автора (URL)',
     imageUrl: 'URL зображення',
     readTime: 'Час читання (хвилин)',
     featured: 'Обране',
     publish: 'Опублікувати',
     publishing: 'Публікація...',
+    uploading: 'Завантаження...',
     required: "Обов'язкове поле",
     imagePlaceholder: 'https://images.unsplash.com/photo-...',
     selectCategory: 'Оберіть категорію',
     pleaseWait: 'Зачекайте...',
-    checkAuth: 'Перевірка авторізації...'
+    checkAuth: 'Перевірка авторізації...',
+    htmlSupported: 'HTML теги підтримуються: <p>, <h2>, <strong>, тощо',
+    cancel: 'Скасувати',
+    chooseFile: 'Оберіть файл',
+    fileSelected: 'Файл обрано',
+    uploadError: 'Помилка завантаження файлу',
+    pdfOnly: 'Тільки PDF файли',
+    maxFileSize: 'Максимальний розмір: 10MB',
+    remove: 'Видалити'
   },
   en: {
     createArticle: 'Create Article',
     backToDashboard: 'Back to Dashboard',
+    contentType: 'Content Type',
+    contentTypeText: 'Text (HTML)',
+    contentTypePdf: 'PDF Document',
     titleUk: 'Title (Ukrainian)',
     titleEn: 'Title (English)',
     excerptUk: 'Excerpt (Ukrainian)',
     excerptEn: 'Excerpt (English)',
     contentUk: 'Content (Ukrainian)',
     contentEn: 'Content (English)',
+    pdfFileUk: 'PDF File (Ukrainian)',
+    pdfFileEn: 'PDF File (English)',
     categoryUk: 'Category (Ukrainian)',
     categoryEn: 'Category (English)',
     authorUk: 'Author (Ukrainian)',
     authorEn: 'Author (English)',
-    authorBioUk: 'Author Bio (Ukrainian)',              // ADD THIS
-    authorBioEn: 'Author Bio (English)',                // ADD THIS
-    authorImage: 'Author Photo (URL)',                  // ADD THIS
+    authorBioUk: 'Author Bio (Ukrainian)',
+    authorBioEn: 'Author Bio (English)',
+    authorImage: 'Author Photo (URL)',
     imageUrl: 'Image URL',
     readTime: 'Read Time (minutes)',
     featured: 'Featured',
     publish: 'Publish',
     publishing: 'Publishing...',
+    uploading: 'Uploading...',
     required: 'Required field',
     imagePlaceholder: 'https://images.unsplash.com/photo-...',
     selectCategory: 'Select category',
     pleaseWait: 'Please wait...',
-    checkAuth: 'Checking authentication...'
+    checkAuth: 'Checking authentication...',
+    htmlSupported: 'HTML tags supported: <p>, <h2>, <strong>, etc',
+    cancel: 'Cancel',
+    chooseFile: 'Choose file',
+    fileSelected: 'File selected',
+    uploadError: 'File upload error',
+    pdfOnly: 'PDF files only',
+    maxFileSize: 'Max size: 10MB',
+    remove: 'Remove'
   }
 };
 
@@ -67,6 +95,8 @@ const categories = {
   en: ['Technology', 'Environment', 'Business', 'Culture', 'Sports', 'Health']
 };
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 export default function CreateArticlePage() {
   const { lang } = useLanguage();
   const t = translations[lang];
@@ -74,22 +104,32 @@ export default function CreateArticlePage() {
   
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingUk, setUploadingUk] = useState(false);
+  const [uploadingEn, setUploadingEn] = useState(false);
   const [error, setError] = useState('');
   
+  const pdfInputUkRef = useRef<HTMLInputElement>(null);
+  const pdfInputEnRef = useRef<HTMLInputElement>(null);
+  
   const [formData, setFormData] = useState({
+    content_type: 'text',
     title_uk: '',
     title_en: '',
     excerpt_uk: '',
     excerpt_en: '',
     content_uk: '',
     content_en: '',
+    pdf_url_uk: '',
+    pdf_url_en: '',
+    pdf_file_uk: null as File | null,
+    pdf_file_en: null as File | null,
     category_uk: '',
     category_en: '',
     author_uk: '',
     author_en: '',
-    author_bio_uk: '',          // ADD THIS
-    author_bio_en: '',          // ADD THIS
-    author_image: '',           // ADD THIS
+    author_bio_uk: '',
+    author_bio_en: '',
+    author_image: '',
     main_image: '',
     read_time: 5,
     featured: false
@@ -122,7 +162,7 @@ export default function CreateArticlePage() {
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedIndex = e.target.selectedIndex;
-    if (selectedIndex > 0) { // Skip the placeholder option
+    if (selectedIndex > 0) {
       setFormData(prev => ({
         ...prev,
         category_uk: categories.uk[selectedIndex - 1],
@@ -131,42 +171,159 @@ export default function CreateArticlePage() {
     }
   };
 
+  const handlePdfFileChange = async (e: React.ChangeEvent<HTMLInputElement>, language: 'uk' | 'en') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== 'application/pdf') {
+      setError(t.pdfOnly);
+      return;
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      setError(`${t.maxFileSize} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+      return;
+    }
+
+    setError('');
+    
+    if (language === 'uk') {
+      setFormData(prev => ({ ...prev, pdf_file_uk: file }));
+    } else {
+      setFormData(prev => ({ ...prev, pdf_file_en: file }));
+    }
+  };
+
+  const removePdfFile = (language: 'uk' | 'en') => {
+    if (language === 'uk') {
+      setFormData(prev => ({ ...prev, pdf_file_uk: null, pdf_url_uk: '' }));
+      if (pdfInputUkRef.current) pdfInputUkRef.current.value = '';
+    } else {
+      setFormData(prev => ({ ...prev, pdf_file_en: null, pdf_url_en: '' }));
+      if (pdfInputEnRef.current) pdfInputEnRef.current.value = '';
+    }
+  };
+
+  const uploadPdfFile = async (file: File, language: 'uk' | 'en'): Promise<string> => {
+    const fileExt = 'pdf';
+    const fileName = `${Date.now()}-${language}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('article-pdfs')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('article-pdfs')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
 
-    // Validation
-    if (!formData.title_uk || !formData.title_en || !formData.content_uk || !formData.content_en) {
-      setError(t.required);
-      setSubmitting(false);
-      return;
-    }
+    try {
+      // Validation
+      if (!formData.title_uk || !formData.title_en) {
+        setError(t.required);
+        setSubmitting(false);
+        return;
+      }
 
-    const { data, error } = await supabase
-      .from('news')
-      .insert([{
+      // Validate based on content type
+      if (formData.content_type === 'text') {
+        if (!formData.content_uk || !formData.content_en) {
+          setError(t.required);
+          setSubmitting(false);
+          return;
+        }
+      } else if (formData.content_type === 'pdf') {
+        if (!formData.pdf_file_uk || !formData.pdf_file_en) {
+          setError(t.required);
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      let pdfUrlUk = '';
+      let pdfUrlEn = '';
+
+      // Upload PDF files if content type is PDF
+      if (formData.content_type === 'pdf') {
+        // Upload Ukrainian PDF
+        if (formData.pdf_file_uk) {
+          setUploadingUk(true);
+          pdfUrlUk = await uploadPdfFile(formData.pdf_file_uk, 'uk');
+          setUploadingUk(false);
+        }
+
+        // Upload English PDF
+        if (formData.pdf_file_en) {
+          setUploadingEn(true);
+          pdfUrlEn = await uploadPdfFile(formData.pdf_file_en, 'en');
+          setUploadingEn(false);
+        }
+      }
+
+      const insertData: any = {
+        content_type: formData.content_type,
         title_uk: formData.title_uk,
         title_en: formData.title_en,
         excerpt_uk: formData.excerpt_uk,
         excerpt_en: formData.excerpt_en,
-        content_uk: formData.content_uk,
-        content_en: formData.content_en,
         category_uk: formData.category_uk,
         category_en: formData.category_en,
         author_uk: formData.author_uk,
         author_en: formData.author_en,
+        author_bio_uk: formData.author_bio_uk,
+        author_bio_en: formData.author_bio_en,
+        author_image: formData.author_image || null,
         main_image: formData.main_image || null,
         read_time: formData.read_time,
         featured: formData.featured
-      }])
-      .select();
+      };
 
-    if (error) {
-      setError(error.message);
-      setSubmitting(false);
-    } else {
+      // Add content based on type
+      if (formData.content_type === 'text') {
+        insertData.content_uk = formData.content_uk;
+        insertData.content_en = formData.content_en;
+        insertData.pdf_url_uk = null;
+        insertData.pdf_url_en = null;
+      } else {
+        insertData.content_uk = '';
+        insertData.content_en = '';
+        insertData.pdf_url_uk = pdfUrlUk;
+        insertData.pdf_url_en = pdfUrlEn;
+      }
+
+      const { data, error: insertError } = await supabase
+        .from('news')
+        .insert([insertData])
+        .select();
+
+      if (insertError) {
+        throw insertError;
+      }
+
       router.push('/admin/dashboard');
+    } catch (err: any) {
+      setError(err.message || t.uploadError);
+      setSubmitting(false);
+      setUploadingUk(false);
+      setUploadingEn(false);
     }
   };
 
@@ -190,13 +347,12 @@ export default function CreateArticlePage() {
             <span className="text-gray-400">{t.createArticle}</span>
           </div>
           
-          
-            <a
-              href="/admin/dashboard"
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              ← {t.backToDashboard}
-            </a>
+          <a
+            href="/admin/dashboard"
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            ← {t.backToDashboard}
+          </a>
         </div>
       </header>
 
@@ -211,6 +367,35 @@ export default function CreateArticlePage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Content Type Selector */}
+          <div>
+            <label className="block text-sm font-bold mb-2">{t.contentType} *</label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="content_type"
+                  value="text"
+                  checked={formData.content_type === 'text'}
+                  onChange={handleChange}
+                  className="w-4 h-4"
+                />
+                <span>{t.contentTypeText}</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="content_type"
+                  value="pdf"
+                  checked={formData.content_type === 'pdf'}
+                  onChange={handleChange}
+                  className="w-4 h-4"
+                />
+                <span>{t.contentTypePdf}</span>
+              </label>
+            </div>
+          </div>
+
           {/* Title Ukrainian */}
           <div>
             <label className="block text-sm font-bold mb-2">{t.titleUk} *</label>
@@ -261,35 +446,136 @@ export default function CreateArticlePage() {
             />
           </div>
 
-          {/* Content Ukrainian */}
-          <div>
-            <label className="block text-sm font-bold mb-2">{t.contentUk} *</label>
-            <textarea
-              name="content_uk"
-              value={formData.content_uk}
-              onChange={handleChange}
-              rows={12}
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors resize-none font-mono text-sm"
-              placeholder="<p>Ваш контент тут...</p>"
-              required
-            />
-            <p className="text-sm text-gray-400 mt-2">HTML теги підтримуються: &lt;p&gt;, &lt;h2&gt;, &lt;strong&gt;, тощо</p>
-          </div>
+          {/* Conditional Content Fields */}
+          {formData.content_type === 'text' ? (
+            <>
+              {/* Content Ukrainian */}
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.contentUk} *</label>
+                <textarea
+                  name="content_uk"
+                  value={formData.content_uk}
+                  onChange={handleChange}
+                  rows={12}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors resize-none font-mono text-sm"
+                  placeholder="<p>Ваш контент тут...</p>"
+                  required
+                />
+                <p className="text-sm text-gray-400 mt-2">{t.htmlSupported}</p>
+              </div>
 
-          {/* Content English */}
-          <div>
-            <label className="block text-sm font-bold mb-2">{t.contentEn} *</label>
-            <textarea
-              name="content_en"
-              value={formData.content_en}
-              onChange={handleChange}
-              rows={12}
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors resize-none font-mono text-sm"
-              placeholder="<p>Your content here...</p>"
-              required
-            />
-            <p className="text-sm text-gray-400 mt-2">HTML tags supported: &lt;p&gt;, &lt;h2&gt;, &lt;strong&gt;, etc</p>
-          </div>
+              {/* Content English */}
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.contentEn} *</label>
+                <textarea
+                  name="content_en"
+                  value={formData.content_en}
+                  onChange={handleChange}
+                  rows={12}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors resize-none font-mono text-sm"
+                  placeholder="<p>Your content here...</p>"
+                  required
+                />
+                <p className="text-sm text-gray-400 mt-2">{t.htmlSupported}</p>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* PDF Upload Ukrainian */}
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.pdfFileUk} *</label>
+                <div className="space-y-3">
+                  <input
+                    ref={pdfInputUkRef}
+                    type="file"
+                    accept="application/pdf"
+                    onChange={(e) => handlePdfFileChange(e, 'uk')}
+                    className="hidden"
+                    id="pdf-upload-uk"
+                  />
+                  <label
+                    htmlFor="pdf-upload-uk"
+                    className="flex items-center justify-center gap-2 w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 cursor-pointer hover:border-green-500 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    {formData.pdf_file_uk ? t.fileSelected : t.chooseFile}
+                  </label>
+                  {formData.pdf_file_uk && (
+                    <div className="flex items-center justify-between bg-gray-900 border border-gray-800 rounded-lg px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                        </svg>
+                        <div>
+                          <p className="font-semibold">{formData.pdf_file_uk.name}</p>
+                          <p className="text-sm text-gray-400">
+                            {(formData.pdf_file_uk.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removePdfFile('uk')}
+                        className="text-red-500 hover:text-red-400 font-semibold"
+                      >
+                        {t.remove}
+                      </button>
+                    </div>
+                  )}
+                  <p className="text-sm text-gray-400">{t.maxFileSize}</p>
+                </div>
+              </div>
+
+              {/* PDF Upload English */}
+              <div>
+                <label className="block text-sm font-bold mb-2">{t.pdfFileEn} *</label>
+                <div className="space-y-3">
+                  <input
+                    ref={pdfInputEnRef}
+                    type="file"
+                    accept="application/pdf"
+                    onChange={(e) => handlePdfFileChange(e, 'en')}
+                    className="hidden"
+                    id="pdf-upload-en"
+                  />
+                  <label
+                    htmlFor="pdf-upload-en"
+                    className="flex items-center justify-center gap-2 w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 cursor-pointer hover:border-green-500 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    {formData.pdf_file_en ? t.fileSelected : t.chooseFile}
+                  </label>
+                  {formData.pdf_file_en && (
+                    <div className="flex items-center justify-between bg-gray-900 border border-gray-800 rounded-lg px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                        </svg>
+                        <div>
+                          <p className="font-semibold">{formData.pdf_file_en.name}</p>
+                          <p className="text-sm text-gray-400">
+                            {(formData.pdf_file_en.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removePdfFile('en')}
+                        className="text-red-500 hover:text-red-400 font-semibold"
+                      >
+                        {t.remove}
+                      </button>
+                    </div>
+                  )}
+                  <p className="text-sm text-gray-400">{t.maxFileSize}</p>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Category */}
           <div>
@@ -330,6 +616,8 @@ export default function CreateArticlePage() {
               className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
             />
           </div>
+
+          {/* Author Bio Ukrainian */}
           <div>
             <label className="block text-sm font-bold mb-2">{t.authorBioUk}</label>
             <textarea
@@ -341,6 +629,7 @@ export default function CreateArticlePage() {
             />
           </div>
 
+          {/* Author Bio English */}
           <div>
             <label className="block text-sm font-bold mb-2">{t.authorBioEn}</label>
             <textarea
@@ -352,6 +641,7 @@ export default function CreateArticlePage() {
             />
           </div>
 
+          {/* Author Image */}
           <div>
             <label className="block text-sm font-bold mb-2">{t.authorImage}</label>
             <input
@@ -364,7 +654,7 @@ export default function CreateArticlePage() {
             />
           </div>
 
-          {/* Image URL */}
+          {/* Main Image URL */}
           <div>
             <label className="block text-sm font-bold mb-2">{t.imageUrl}</label>
             <input
@@ -421,17 +711,23 @@ export default function CreateArticlePage() {
           <div className="flex gap-4 pt-6">
             <button
               type="submit"
-              disabled={submitting}
-              className="flex-1 bg-green-500 text-black px-6 py-4 rounded-lg font-bold hover:bg-green-400 transition-colors disabled:opacity-50"
+              disabled={submitting || uploadingUk || uploadingEn}
+              className="flex-1 bg-green-500 text-black px-6 py-4 rounded-lg font-bold hover:bg-green-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {submitting ? t.publishing : t.publish}
+              {(submitting || uploadingUk || uploadingEn) && (
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              {uploadingUk || uploadingEn ? t.uploading : (submitting ? t.publishing : t.publish)}
             </button>
             
             <a
               href="/admin/dashboard"
               className="px-6 py-4 bg-gray-800 hover:bg-gray-700 rounded-lg font-bold transition-colors"
             >
-              {lang === 'uk' ? 'Скасувати' : 'Cancel'}
+              {t.cancel}
             </a>
           </div>
         </form>
