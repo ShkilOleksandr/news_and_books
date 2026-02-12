@@ -28,6 +28,7 @@ const translations = {
     authorBioEn: 'Біографія автора (English)',
     authorImage: 'Фото автора (URL)',
     imageUrl: 'URL зображення',
+    createdDate: 'Дата створення',
     readTime: 'Час читання (хвилин)',
     featured: 'Обране',
     publish: 'Опублікувати',
@@ -45,7 +46,8 @@ const translations = {
     uploadError: 'Помилка завантаження файлу',
     pdfOnly: 'Тільки PDF файли',
     maxFileSize: 'Максимальний розмір: 10MB',
-    remove: 'Видалити'
+    remove: 'Видалити',
+    createdDateHelper: 'Залиште порожнім для поточної дати та часу'
   },
   en: {
     createArticle: 'Create Article',
@@ -69,6 +71,7 @@ const translations = {
     authorBioEn: 'Author Bio (English)',
     authorImage: 'Author Photo (URL)',
     imageUrl: 'Image URL',
+    createdDate: 'Created Date',
     readTime: 'Read Time (minutes)',
     featured: 'Featured',
     publish: 'Publish',
@@ -86,7 +89,8 @@ const translations = {
     uploadError: 'File upload error',
     pdfOnly: 'PDF files only',
     maxFileSize: 'Max size: 10MB',
-    remove: 'Remove'
+    remove: 'Remove',
+    createdDateHelper: 'Leave empty for current date and time'
   }
 };
 
@@ -131,6 +135,7 @@ export default function CreateArticlePage() {
     author_bio_en: '',
     author_image: '',
     main_image: '',
+    created_at: '',
     read_time: 5,
     featured: false
   });
@@ -292,6 +297,7 @@ export default function CreateArticlePage() {
         author_bio_en: formData.author_bio_en,
         author_image: formData.author_image || null,
         main_image: formData.main_image || null,
+        created_at: formData.created_at || new Date().toISOString(),
         read_time: formData.read_time,
         featured: formData.featured
       };
@@ -677,6 +683,19 @@ export default function CreateArticlePage() {
                 />
               </div>
             )}
+          </div>
+
+          {/* Created Date */}
+          <div>
+            <label className="block text-sm font-bold mb-2">{t.createdDate}</label>
+            <input
+              type="datetime-local"
+              name="created_at"
+              value={formData.created_at}
+              onChange={handleChange}
+              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
+            />
+            <p className="text-sm text-gray-400 mt-2">{t.createdDateHelper}</p>
           </div>
 
           {/* Read Time */}

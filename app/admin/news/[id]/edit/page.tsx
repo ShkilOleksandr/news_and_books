@@ -28,6 +28,7 @@ const translations = {
     authorBioEn: 'Біографія автора (English)',
     authorImage: 'Фото автора (URL)',
     imageUrl: 'URL зображення',
+    createdDate: 'Дата створення',
     readTime: 'Час читання (хвилин)',
     featured: 'Обране',
     save: 'Зберегти',
@@ -49,7 +50,8 @@ const translations = {
     currentPdf: 'Поточний PDF',
     replaceFile: 'Замінити файл',
     keepCurrent: 'Залишити поточний',
-    htmlSupported: 'HTML теги підтримуються: <p>, <h2>, <strong>, тощо'
+    htmlSupported: 'HTML теги підтримуються: <p>, <h2>, <strong>, тощо',
+    createdDateHelper: 'Дата та час створення статті'
   },
   en: {
     editArticle: 'Edit Article',
@@ -73,6 +75,7 @@ const translations = {
     authorBioEn: 'Author Bio (English)',
     authorImage: 'Author Photo (URL)',
     imageUrl: 'Image URL',
+    createdDate: 'Created Date',
     readTime: 'Read Time (minutes)',
     featured: 'Featured',
     save: 'Save Changes',
@@ -94,7 +97,8 @@ const translations = {
     currentPdf: 'Current PDF',
     replaceFile: 'Replace file',
     keepCurrent: 'Keep current',
-    htmlSupported: 'HTML tags supported: <p>, <h2>, <strong>, etc'
+    htmlSupported: 'HTML tags supported: <p>, <h2>, <strong>, etc',
+    createdDateHelper: 'Date and time when article was created'
   }
 };
 
@@ -124,6 +128,7 @@ type NewsItem = {
   author_bio_en: string;
   author_image: string;
   main_image: string | null;
+  created_at: string;
   read_time: number;
   featured: boolean;
 };
@@ -163,6 +168,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
     author_bio_en: '',
     author_image: '',
     main_image: '',
+    created_at: '',
     read_time: 5,
     featured: false
   });
@@ -343,6 +349,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         author_bio_en: formData.author_bio_en,
         author_image: formData.author_image || null,
         main_image: formData.main_image || null,
+        created_at: formData.created_at,
         read_time: formData.read_time,
         featured: formData.featured,
         updated_at: new Date().toISOString()
@@ -802,6 +809,19 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 />
               </div>
             )}
+          </div>
+
+          {/* Created Date */}
+          <div>
+            <label className="block text-sm font-bold mb-2">{t.createdDate}</label>
+            <input
+              type="datetime-local"
+              name="created_at"
+              value={formData.created_at ? new Date(formData.created_at).toISOString().slice(0, 16) : ''}
+              onChange={handleChange}
+              className="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 transition-colors"
+            />
+            <p className="text-sm text-gray-400 mt-2">{t.createdDateHelper}</p>
           </div>
 
           {/* Read Time */}
