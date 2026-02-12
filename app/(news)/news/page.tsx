@@ -50,6 +50,32 @@ const categories = [
   { uk: 'Здоров\'я', en: 'Health' }
 ];
 
+// Ukrainian month names in genitive case (родовий відмінок)
+const monthsUk = [
+  'січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
+  'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'
+];
+
+// English month names
+const monthsEn = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+// Format date based on language
+const formatDate = (dateString: string, language: 'uk' | 'en'): string => {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.getMonth();
+  const year = date.getFullYear();
+
+  if (language === 'uk') {
+    return `${day} ${monthsUk[month]} ${year}`;
+  } else {
+    return `${monthsEn[month]} ${day}, ${year}`;
+  }
+};
+
 export default function NewsPage() {
   const { lang } = useLanguage(); 
   const [selectedCategory, setSelectedCategory] = useState('Всі');
@@ -145,7 +171,7 @@ export default function NewsPage() {
                       <span className="bg-green-500 text-black px-3 py-1 rounded-full text-sm font-bold">
                         {lang === 'uk' ? item.category_uk : item.category_en}
                       </span>
-                      <span className="text-gray-400 text-sm">{new Date(item.created_at).toLocaleDateString()}</span>
+                      <span className="text-gray-400 text-sm">{formatDate(item.created_at, lang)}</span>
                     </div>
                     <h3 className="text-2xl font-bold mb-3 group-hover:text-green-500 transition-colors">
                       {lang === 'uk' ? item.title_uk : item.title_en}
@@ -179,7 +205,7 @@ export default function NewsPage() {
                     <span className="bg-gray-800 text-white px-3 py-1 rounded-full text-sm">
                       {lang === 'uk' ? item.category_uk : item.category_en}
                     </span>
-                    <span className="text-gray-400 text-sm">{new Date(item.created_at).toLocaleDateString()}</span>
+                    <span className="text-gray-400 text-sm">{formatDate(item.created_at, lang)}</span>
                   </div>
                   <h3 className="text-xl font-bold mb-2 group-hover:text-green-500 transition-colors">
                     {lang === 'uk' ? item.title_uk : item.title_en}
