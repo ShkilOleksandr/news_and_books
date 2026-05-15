@@ -1,4 +1,7 @@
 {
+  "redirects": [
+    { "source": "/(.*)", "destination": "/maintenance", "permanent": false }
+  ],
   "headers": [
     {
       "source": "/(.*)",
